@@ -1,0 +1,4 @@
+D:\Projects\Marketo Integration\1. Reference Assemblies\3. Common\MKTO.Common.Utility.dll
+D:\Projects\Marketo Integration\1. Reference Assemblies\3. Common\MKTO.Common.Utility.pdb
+D:\Projects\Marketo Integration\2. Client Tasks\MKTO.Client.Utility\MKTO.Client.Utility\obj\Debug\MKTO.Common.Utility.dll
+D:\Projects\Marketo Integration\2. Client Tasks\MKTO.Client.Utility\MKTO.Client.Utility\obj\Debug\MKTO.Common.Utility.pdb

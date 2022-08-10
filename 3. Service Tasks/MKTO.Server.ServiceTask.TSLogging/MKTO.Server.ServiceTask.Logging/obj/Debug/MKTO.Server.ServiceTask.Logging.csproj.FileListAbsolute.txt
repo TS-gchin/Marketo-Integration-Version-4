@@ -1,0 +1,8 @@
+D:\src\Marketo Integration Version 4\3. Service Tasks\MKTO.Server.ServiceTask.TSLogging\MKTO.Server.ServiceTask.Logging\obj\Debug\MKTO.Server.ServiceTask.Logging.csprojAssemblyReference.cache
+D:\src\Marketo Integration Version 4\3. Service Tasks\MKTO.Server.ServiceTask.TSLogging\MKTO.Server.ServiceTask.Logging\obj\Debug\MKTO.Server.ServiceTask.Logging.csproj.CoreCompileInputs.cache
+C:\Program Files (x86)\CDC Software\Pivotal CRM\Business Server\ServerTasks\MKTO.Server.ServiceTask.Logging.dll
+C:\Program Files (x86)\CDC Software\Pivotal CRM\Business Server\ServerTasks\MKTO.Server.ServiceTask.Logging.pdb
+C:\Program Files (x86)\CDC Software\Pivotal CRM\Business Server\ServerTasks\MKTO.Server.ServiceTask.Logging.xml
+D:\src\Marketo Integration Version 4\3. Service Tasks\MKTO.Server.ServiceTask.TSLogging\MKTO.Server.ServiceTask.Logging\obj\Debug\MKTO.Server.ServiceTask.Logging.csproj.CopyComplete
+D:\src\Marketo Integration Version 4\3. Service Tasks\MKTO.Server.ServiceTask.TSLogging\MKTO.Server.ServiceTask.Logging\obj\Debug\MKTO.Server.ServiceTask.Logging.dll
+D:\src\Marketo Integration Version 4\3. Service Tasks\MKTO.Server.ServiceTask.TSLogging\MKTO.Server.ServiceTask.Logging\obj\Debug\MKTO.Server.ServiceTask.Logging.pdb

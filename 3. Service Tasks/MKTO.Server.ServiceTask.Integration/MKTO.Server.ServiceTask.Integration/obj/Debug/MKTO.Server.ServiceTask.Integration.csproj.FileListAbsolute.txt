@@ -1,0 +1,7 @@
+C:\Program Files (x86)\CDC Software\Pivotal CRM\Business Server\ServerTasks\MKTO.Server.ServiceTask.Integration.dll
+C:\Program Files (x86)\CDC Software\Pivotal CRM\Business Server\ServerTasks\MKTO.Server.ServiceTask.Integration.pdb
+C:\Program Files (x86)\CDC Software\Pivotal CRM\Business Server\ServerTasks\MKTO.Server.ServiceTask.Integration.xml
+D:\src\Marketo Integration Version 4\3. Service Tasks\MKTO.Server.ServiceTask.Integration\MKTO.Server.ServiceTask.Integration\obj\Debug\MKTO.Server.ServiceTask.Integration.csproj.CoreCompileInputs.cache
+D:\src\Marketo Integration Version 4\3. Service Tasks\MKTO.Server.ServiceTask.Integration\MKTO.Server.ServiceTask.Integration\obj\Debug\MKTO.Server.ServiceTask.Integration.csproj.CopyComplete
+D:\src\Marketo Integration Version 4\3. Service Tasks\MKTO.Server.ServiceTask.Integration\MKTO.Server.ServiceTask.Integration\obj\Debug\MKTO.Server.ServiceTask.Integration.dll
+D:\src\Marketo Integration Version 4\3. Service Tasks\MKTO.Server.ServiceTask.Integration\MKTO.Server.ServiceTask.Integration\obj\Debug\MKTO.Server.ServiceTask.Integration.pdb

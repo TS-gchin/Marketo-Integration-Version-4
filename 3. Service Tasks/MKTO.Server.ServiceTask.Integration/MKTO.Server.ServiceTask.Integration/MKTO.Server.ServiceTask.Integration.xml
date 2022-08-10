@@ -1,0 +1,227 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MKTO.Server.ServiceTask.Integration</name>
+    </assembly>
+    <members>
+        <member name="T:MKTO.Server.ServiceTask.MKTOActivity">
+            <summary>
+            The service server task class to undertake some specfic business tasks for the Specified Business object group. All methods
+            can be directly called by other Form Server Tasks or remotely called by Client Tasks through client proxy classes.
+            </summary>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.MKTOActivity.getActivityData(System.String,System.String,System.DateTime,System.String[])">
+            <summary>
+            Get Activity Data based on types
+            </summary>
+            <param name="mktoUrl"></param>
+            <param name="pagingToken"></param>
+            <param name="getFromDateTime"></param>
+            <param name="activityTypeIds"></param>
+            <returns></returns>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.MKTOActivity.GetLeadActivities(System.String[],System.String,System.String,System.String)">
+            <summary>
+            Returns an array of lead activity
+            </summary>
+            <param name="fields"></param>
+            <param name="mktoIdentityURL"></param>
+            <param name="mktoClientId"></param>
+            <param name="mktoSecret"></param>
+            <returns></returns>
+        </member>
+        <member name="T:MKTO.Server.ServiceTask.Integration">
+            <summary>
+            Handle the integration between Pivotal and Marketo
+            </summary>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.#ctor">
+            <summary>
+            Initialize the instance of AppServiceServerTask class and set the default resource bundle to 'xxxxxx' LD Group.
+            </summary>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.GetIntegrationDtlData(CdcSoftware.Pivotal.Engine.Id)">
+            <summary>
+                Retrieve values from the Marketo_Integration_Detail record and update the curData object
+            </summary>
+            <param name="integrationDetailId">Marketo_Integration_Detail_Id</param>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.GetConfigurationData(CdcSoftware.Pivotal.Engine.Id)">
+            <summary>
+                Retrieve values from the Marketo_Configuration record and update the curData object
+                with the Identity URL, REST URL, client and secret used to connect to Marketo
+            </summary>
+            <param name="configurationId">Marketo_Configuration_Id</param>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.GetPagingToken(System.DateTime)">
+            <summary>
+                Get the Marketo paging token given timestamp so that Marketo will
+                retrieve records updated after sinceDateTime
+            </summary>
+            <param name="sinceDateTime">Timestamp</param>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.GetFieldMapping(System.String)">
+            <summary>
+                Get field mappings based on the master system
+                valid values are "Pivotal" and "Marketo"
+            </summary>
+            <param name="masterSystem">Either Pivotal or Marketo</param>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.CreateQuery(System.Data.DataTable)">
+            <summary>
+                Create query to retrieve data from Pivotal
+            </summary>
+            <param name="dtMapping">Mapping table</param>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.RetrieveFieldName(System.String,System.Data.DataRow)">
+            <summary>
+                Retrieve field names for a given mapping based on the field prefix
+            </summary>
+            <param name="fieldPrefix"></param>
+            <param name="drMapping"></param>
+            <returns>Field name</returns>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.RetrieveTableName(System.String,System.Data.DataRow)">
+            <summary>
+                Retrieve table names for a given mapping based on the field prefix
+            </summary>
+            <param name="fieldPrefix"></param>
+            <param name="drMapping"></param>
+            <returns>Table name</returns>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.RetrieveWhereClause">
+            <summary>
+                Generate the where clause based on the Marketo_Integration_Detail record
+            </summary>
+            <returns>The Where Clause</returns>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.SetPivotalExternalSourceId(System.String,CdcSoftware.Pivotal.Engine.Id,System.String)">
+            <summary>
+                Sets the value of the Pivotal external source id with the Marketo Id
+            </summary>
+            <param name="pivObject">Pivotal object</param>
+            <param name="pivRecordId">Pivotal Record Id</param>
+            <param name="externalSourceId"></param>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.UpdateLastRunDate">
+            <summary>
+                Update Marketo_Integration_Detail.Last_Run_Date with the current timestamp
+            </summary>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.UpdateLastRunDate(CdcSoftware.Pivotal.Engine.Id)">
+            <summary>
+                Update Marketo_Integration_Detail.Last_Run_Date with the current timestamp
+            </summary>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.ProcessRecords">
+            <summary>
+                This method is used to cycle through all of the integration detail records
+            </summary>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.SSUpdatePivotalRecord">
+            <summary>
+                This method is used to update the Pivotal records from Marketo
+            </summary>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.SSUpdateMarketoRecord">
+            <summary>
+                This method is used to update the Pivotal records from Marketo
+            </summary>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.UpdatePivotalRecord(CdcSoftware.Pivotal.Engine.Id)">
+            <summary>
+                This method is used to update the Pivotal records from Marketo
+            </summary>
+            <history>
+            <paramref name="integrationDetailId">Marketo_Detail_Integration_Id</paramref>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.UpdatePivotalRecordFromNew(CdcSoftware.Pivotal.Engine.Id)">
+            <summary>
+                This method is used to update the Pivotal records from Marketo for newly created records
+                
+            </summary>
+            <history>
+            <paramref name="integrationDetailId">Marketo_Detail_Integration_Id</paramref>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.UpdateMarketoRecord(CdcSoftware.Pivotal.Engine.Id)">
+            <summary>
+                This method is used to update the Marketo records from Pivotal
+            </summary>
+            <param name="integrationDetailId">Marketo_Integration_Detail_Id</param>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.GetMarketoObjectFields(CdcSoftware.Pivotal.Engine.Id,System.String)">
+            <summary>
+                This method is used to retrieve Marketo fields from specified object
+            </summary>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.GetMarketoActivityFields(CdcSoftware.Pivotal.Engine.Id,System.String)">
+            <summary>
+                This method is used to retrieve Marketo fields from specified object
+            </summary>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+    </members>
+</doc>

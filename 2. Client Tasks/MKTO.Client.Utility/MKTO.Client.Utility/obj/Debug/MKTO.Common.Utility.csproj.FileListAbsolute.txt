@@ -1,0 +1,16 @@
+D:\Projects\Marketo Integration\1. Reference Assemblies\3. Common\MKTO.Common.Utility.dll
+D:\Projects\Marketo Integration\1. Reference Assemblies\3. Common\MKTO.Common.Utility.pdb
+D:\Projects\Marketo Integration\2. Client Tasks\MKTO.Client.Utility\MKTO.Client.Utility\obj\Debug\MKTO.Common.Utility.csprojResolveAssemblyReference.cache
+D:\Projects\Marketo Integration\2. Client Tasks\MKTO.Client.Utility\MKTO.Client.Utility\obj\Debug\MKTO.Common.Utility.dll
+D:\Projects\Marketo Integration\2. Client Tasks\MKTO.Client.Utility\MKTO.Client.Utility\obj\Debug\MKTO.Common.Utility.pdb
+D:\src\Marketo Integration Version 3\1. Reference Assemblies\3. Common\MKTO.Common.Utility.dll
+D:\src\Marketo Integration Version 3\1. Reference Assemblies\3. Common\MKTO.Common.Utility.pdb
+D:\src\Marketo Integration Version 3\Client Tasks\MKTO.Client.Utility\MKTO.Client.Utility\obj\Debug\MKTO.Common.Utility.csproj.CoreCompileInputs.cache
+D:\src\Marketo Integration Version 3\Client Tasks\MKTO.Client.Utility\MKTO.Client.Utility\obj\Debug\MKTO.Common.Utility.dll
+D:\src\Marketo Integration Version 3\Client Tasks\MKTO.Client.Utility\MKTO.Client.Utility\obj\Debug\MKTO.Common.Utility.pdb
+C:\Program Files (x86)\CDC Software\Pivotal CRM\Business Server\ServerTasks\MKTO.Common.Utility.dll
+C:\Program Files (x86)\CDC Software\Pivotal CRM\Business Server\ServerTasks\MKTO.Common.Utility.pdb
+D:\src\Marketo Integration Version 4\2. Client Tasks\MKTO.Client.Utility\MKTO.Client.Utility\obj\Debug\MKTO.Common.Utility.csprojAssemblyReference.cache
+D:\src\Marketo Integration Version 4\2. Client Tasks\MKTO.Client.Utility\MKTO.Client.Utility\obj\Debug\MKTO.Common.Utility.csproj.CoreCompileInputs.cache
+D:\src\Marketo Integration Version 4\2. Client Tasks\MKTO.Client.Utility\MKTO.Client.Utility\obj\Debug\MKTO.Common.Utility.dll
+D:\src\Marketo Integration Version 4\2. Client Tasks\MKTO.Client.Utility\MKTO.Client.Utility\obj\Debug\MKTO.Common.Utility.pdb

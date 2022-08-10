@@ -1,0 +1,24 @@
+D:\Projects\2. Client Tasks\MKTO.Client.FormTask.Configuration\MKTO.Client.FormTask.Configuration\obj\Debug\MKTO.Client.FormTask.Configuration.csprojResolveAssemblyReference.cache
+D:\Projects\2. Client Tasks\MKTO.Client.FormTask.Configuration\MKTO.Client.FormTask.Configuration\obj\Debug\MKTO.Client.FormTask.Configuration.dll
+D:\Projects\2. Client Tasks\MKTO.Client.FormTask.Configuration\MKTO.Client.FormTask.Configuration\obj\Debug\MKTO.Client.FormTask.Configuration.pdb
+C:\Users\Administrator\AppData\Local\CDC Software\Smart Client\PivotalClient.PerMachine\exe\PivotalClient\Pivotal6.5.2\ClientTasks\MKTO.Client.FormTask.Configuration.dll
+C:\Users\Administrator\AppData\Local\CDC Software\Smart Client\PivotalClient.PerMachine\exe\PivotalClient\Pivotal6.5.2\ClientTasks\MKTO.Client.FormTask.Configuration.pdb
+D:\Projects\Marketo Integration\2. Client Tasks\MKTO.Client.FormTask.Configuration\MKTO.Client.FormTask.Configuration\obj\Debug\MKTO.Client.FormTask.Configuration.dll
+D:\Projects\Marketo Integration\2. Client Tasks\MKTO.Client.FormTask.Configuration\MKTO.Client.FormTask.Configuration\obj\Debug\MKTO.Client.FormTask.Configuration.pdb
+C:\Users\jbartels\AppData\Local\CDC Software\Smart Client\PivotalClient.PerMachine\exe\PivotalClient\Pivotal6.5.2\ClientTasks\MKTO.Client.FormTask.Configuration.dll
+C:\Users\jbartels\AppData\Local\CDC Software\Smart Client\PivotalClient.PerMachine\exe\PivotalClient\Pivotal6.5.2\ClientTasks\MKTO.Client.FormTask.Configuration.pdb
+D:\src\Marketo Integration Version 3\2. Client Tasks\MKTO.Client.FormTask.Configuration\MKTO.Client.FormTask.Configuration\obj\Debug\MKTO.Client.FormTask.Configuration.csprojAssemblyReference.cache
+D:\src\Marketo Integration Version 3\2. Client Tasks\MKTO.Client.FormTask.Configuration\MKTO.Client.FormTask.Configuration\obj\Debug\MKTO.Client.FormTask.Configuration.csproj.CoreCompileInputs.cache
+D:\src\Marketo Integration Version 3\2. Client Tasks\MKTO.Client.FormTask.Configuration\MKTO.Client.FormTask.Configuration\obj\Debug\MKTO.Client.FormTask.Configuration.csproj.CopyComplete
+D:\src\Marketo Integration Version 3\2. Client Tasks\MKTO.Client.FormTask.Configuration\MKTO.Client.FormTask.Configuration\obj\Debug\MKTO.Client.FormTask.Configuration.dll
+D:\src\Marketo Integration Version 3\2. Client Tasks\MKTO.Client.FormTask.Configuration\MKTO.Client.FormTask.Configuration\obj\Debug\MKTO.Client.FormTask.Configuration.pdb
+D:\src\Marketo Integration Version 3\Client Tasks\MKTO.Client.FormTask.Configuration\MKTO.Client.FormTask.Configuration\obj\Debug\MKTO.Client.FormTask.Configuration.csprojAssemblyReference.cache
+D:\src\Marketo Integration Version 3\Client Tasks\MKTO.Client.FormTask.Configuration\MKTO.Client.FormTask.Configuration\obj\Debug\MKTO.Client.FormTask.Configuration.csproj.CoreCompileInputs.cache
+D:\src\Marketo Integration Version 3\Client Tasks\MKTO.Client.FormTask.Configuration\MKTO.Client.FormTask.Configuration\obj\Debug\MKTO.Client.FormTask.Configuration.csproj.CopyComplete
+D:\src\Marketo Integration Version 3\Client Tasks\MKTO.Client.FormTask.Configuration\MKTO.Client.FormTask.Configuration\obj\Debug\MKTO.Client.FormTask.Configuration.dll
+D:\src\Marketo Integration Version 3\Client Tasks\MKTO.Client.FormTask.Configuration\MKTO.Client.FormTask.Configuration\obj\Debug\MKTO.Client.FormTask.Configuration.pdb
+D:\src\Marketo Integration Version 4\2. Client Tasks\MKTO.Client.FormTask.Configuration\MKTO.Client.FormTask.Configuration\obj\Debug\MKTO.Client.FormTask.Configuration.csprojAssemblyReference.cache
+D:\src\Marketo Integration Version 4\2. Client Tasks\MKTO.Client.FormTask.Configuration\MKTO.Client.FormTask.Configuration\obj\Debug\MKTO.Client.FormTask.Configuration.csproj.CoreCompileInputs.cache
+D:\src\Marketo Integration Version 4\2. Client Tasks\MKTO.Client.FormTask.Configuration\MKTO.Client.FormTask.Configuration\obj\Debug\MKTO.Client.FormTask.Configuration.csproj.CopyComplete
+D:\src\Marketo Integration Version 4\2. Client Tasks\MKTO.Client.FormTask.Configuration\MKTO.Client.FormTask.Configuration\obj\Debug\MKTO.Client.FormTask.Configuration.dll
+D:\src\Marketo Integration Version 4\2. Client Tasks\MKTO.Client.FormTask.Configuration\MKTO.Client.FormTask.Configuration\obj\Debug\MKTO.Client.FormTask.Configuration.pdb

@@ -1,0 +1,214 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MKTO.Client.FormTask.ConfigurationDetail</name>
+    </assembly>
+    <members>
+        <member name="T:MKTO.Client.FormTasks.ConfigurationDetail">
+            <summary>
+            The Form Client Task class inludes a number of form control event handlers in this file.
+            The event can call Form Server Task and Service Server Task.
+            </summary>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+            <summary>
+            The Form Client Task class to undertake some specfic tasks for one business object associated to a specified form. It will call
+            Form Server Task and Service Server Task.
+            </summary>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.OnTableNameChange(CdcSoftware.Pivotal.Engine.UI.Forms.PivotalControl,System.EventArgs)">
+            <summary>
+            
+            </summary>
+            <param name="sender">The control associated with the event triggered</param>
+            <param name="args">The argument for the event</param>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.OnMarketoObjectChange(CdcSoftware.Pivotal.Engine.UI.Forms.PivotalControl,System.EventArgs)">
+            <summary>
+            
+            </summary>
+            <param name="sender">The control associated with the event triggered</param>
+            <param name="args">The argument for the event</param>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.OnParentTableNameChange(CdcSoftware.Pivotal.Engine.UI.Forms.PivotalControl,System.EventArgs)">
+            <summary>
+            
+            </summary>
+            <param name="sender">The control associated with the event triggered</param>
+            <param name="args">The argument for the event</param>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.OnChildTableNameChange(CdcSoftware.Pivotal.Engine.UI.Forms.PivotalControl,System.EventArgs)">
+            <summary>
+            
+            </summary>
+            <param name="sender">The control associated with the event triggered</param>
+            <param name="args">The argument for the event</param>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.OnAddMappingButtonClick(CdcSoftware.Pivotal.Engine.UI.Forms.PivotalControl,System.EventArgs)">
+            <summary>
+            
+            </summary>
+            <param name="sender">The control associated with the event triggered</param>
+            <param name="args">The argument for the event</param>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.OnAddRelationshipButtonClick(CdcSoftware.Pivotal.Engine.UI.Forms.PivotalControl,System.EventArgs)">
+            <summary>
+            
+            </summary>
+            <param name="sender">The control associated with the event triggered</param>
+            <param name="args">The argument for the event</param>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.OnUpdateMarketoButtonClick(CdcSoftware.Pivotal.Engine.UI.Forms.PivotalControl,System.EventArgs)">
+            <summary>
+            
+            </summary>
+            <param name="sender">The control associated with the event triggered</param>
+            <param name="args">The argument for the event</param>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.OnUpdatePivotalButtonClick(CdcSoftware.Pivotal.Engine.UI.Forms.PivotalControl,System.EventArgs)">
+            <summary>
+            
+            </summary>
+            <param name="sender">The control associated with the event triggered</param>
+            <param name="args">The argument for the event</param>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.UpdateFieldNameDropdown(System.String,System.String)">
+            <summary>
+            
+            </summary>
+            <history>
+            Revision# Date Author Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.UpdateMarketoFieldNameDropdown">
+            <summary>
+            
+            </summary>
+            <history>
+            Revision# Date Author Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.AddMappingToSecondary">
+            <summary>
+            
+            </summary>
+            <history>
+            Revision# Date Author Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.IsMarketoCheckedChanged(CdcSoftware.Pivotal.Engine.UI.Forms.PivotalControl,System.EventArgs)">
+            <summary>
+            
+            </summary>
+            <param name="sender">The control associated with the event triggered</param>
+            <param name="args">The argument for the event</param>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.OnMarketoActivityChange(CdcSoftware.Pivotal.Engine.UI.Forms.PivotalControl,System.EventArgs)">
+            <summary>
+            
+            </summary>
+            <param name="sender">The control associated with the event triggered</param>
+            <param name="args">The argument for the event</param>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.#ctor">
+            <summary>
+            Initialize the instance of AppFormClientTask class and set the default resource bundle to 'xxxxxx' LD Group.
+            </summary>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.AddRecord">
+            <summary>
+            Save a new record into database
+            </summary>
+            <history>
+            Revision# Date Author Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.DeleteRecord">
+            <summary>
+            This function deletes the current Form
+            </summary>
+            <history>
+            Revision# Date Author Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.LoadRecord">
+            <summary>
+            This function opens an existing form
+            </summary>
+            <history>
+            Revision# Date Author Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.OnFormInitialized">
+            <summary>
+            This method gets called when the form meta data and data have both been loaded,
+            and the form UI has finished drawing. Override this method to perform custom
+            form initialization.
+            </summary>
+            <history>
+            Revision# Date Author Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.NewRecord">
+            <summary>
+            This function opens an new form
+            </summary>
+            <history>
+            Revision# Date Author Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.SaveRecord">
+            <summary>
+            This function updates the Form
+            </summary>
+            <history>
+            Revision# Date Author Description
+            </history>
+        </member>
+        <member name="M:MKTO.Client.FormTasks.ConfigurationDetail.UpdateMarketoActivityFieldNameDropdown">
+            <summary>
+            
+            </summary>
+            <history>
+            Revision# Date Author Description
+            </history>
+        </member>
+    </members>
+</doc>

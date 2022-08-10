@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MKTO.Server.ServiceTask.Logging</name>
+    </assembly>
+    <members>
+        <member name="T:MKTO.Server.ServiceTask.Logging">
+            <summary>
+            The service server task class to undertake some specfic business tasks for the Specified Business object group. All methods
+            can be directly called by other Form Server Tasks or remotely called by Client Tasks through client proxy classes.
+            </summary>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Logging.#ctor">
+            <summary>
+            Initialize the instance of AppServiceServerTask class and set the default resource bundle to 'xxxxxx' LD Group.
+            </summary>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Logging.WriteToLog(CdcSoftware.Pivotal.Engine.Id,System.String,System.Diagnostics.EventLogEntryType,System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            
+            </summary>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+    </members>
+</doc>
