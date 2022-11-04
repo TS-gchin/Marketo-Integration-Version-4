@@ -1380,6 +1380,7 @@ namespace MKTO.Server.ServiceTask
                                                                     }
                                                                     else
                                                                     {
+
                                                                         // Compare the length of data coming in from Marketo with the Pivotal field data length.
                                                                         // If the data is longer than the Pivotal field, trim it to fit in the Pivotal field
                                                                         int pivFieldLength = curRecord.Table.Columns[curData.fieldMapping[xmlFieldInfo["name"].InnerText]].MaxLength;
