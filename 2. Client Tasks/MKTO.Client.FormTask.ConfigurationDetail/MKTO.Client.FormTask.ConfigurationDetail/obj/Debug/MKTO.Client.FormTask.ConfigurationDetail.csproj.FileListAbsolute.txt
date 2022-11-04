@@ -24,7 +24,6 @@ D:\src\Marketo Integration Version 3\Client Tasks\MKTO.Client.FormTask.Configura
 C:\Users\Administrator\AppData\Local\CDC Software\Smart Client\PivotalClient.PerMachine\exe\PivotalClient\Pivotal\ClientTasks\MKTO.Client.FormTask.ConfigurationDetail.dll
 C:\Users\Administrator\AppData\Local\CDC Software\Smart Client\PivotalClient.PerMachine\exe\PivotalClient\Pivotal\ClientTasks\MKTO.Client.FormTask.ConfigurationDetail.pdb
 C:\Users\Administrator\AppData\Local\CDC Software\Smart Client\PivotalClient.PerMachine\exe\PivotalClient\Pivotal\ClientTasks\MKTO.Client.FormTask.ConfigurationDetail.xml
-D:\src\Marketo Integration Version 4\2. Client Tasks\MKTO.Client.FormTask.ConfigurationDetail\MKTO.Client.FormTask.ConfigurationDetail\obj\Debug\MKTO.Client.FormTask.ConfigurationDetail.csprojAssemblyReference.cache
 D:\src\Marketo Integration Version 4\2. Client Tasks\MKTO.Client.FormTask.ConfigurationDetail\MKTO.Client.FormTask.ConfigurationDetail\obj\Debug\MKTO.Client.FormTask.ConfigurationDetail.csproj.CoreCompileInputs.cache
 D:\src\Marketo Integration Version 4\2. Client Tasks\MKTO.Client.FormTask.ConfigurationDetail\MKTO.Client.FormTask.ConfigurationDetail\obj\Debug\MKTO.Client.FormTask.ConfigurationDetail.csproj.CopyComplete
 D:\src\Marketo Integration Version 4\2. Client Tasks\MKTO.Client.FormTask.ConfigurationDetail\MKTO.Client.FormTask.ConfigurationDetail\obj\Debug\MKTO.Client.FormTask.ConfigurationDetail.dll

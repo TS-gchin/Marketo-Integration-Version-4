@@ -697,9 +697,10 @@ namespace MKTO.Server.ServiceTask
         [TaskExecute]
         public virtual void ProcessRecords()
         {
-            string strQuery = "SELECT Marketo_Integration_Detail_Id, mc.Marketo_Configuration_Id, Data_Direction,Log_level " +
+            string strQuery = "SELECT Marketo_Integration_Detail_Id, mc.Marketo_Configuration_Id, Data_Direction,Log_level, mid.Is_Marketo_Activity  " +
                               "FROM Marketo_Integration_Detail mid INNER JOIN Marketo_Configuration mc on mc.Marketo_Configuration_Id = mid.Marketo_Configuration_Id " +
-                              "WHERE ISNULL(Active,0) = 1 ";
+                              "WHERE ISNULL(Active,0) = 1 " +
+                              "ORDER BY Execution_Order ASC ";
             //            string strQuery = "SELECT Marketo_Integration_Detail_Id, Marketo_Configuration_Id, Data_Direction FROM Marketo_Integration_Detail WHERE ISNULL(Active,0) = 1";
             using (DataTable dtRecords = this.DefaultDataAccess.GetDataTable(strQuery))
             {
@@ -720,6 +721,7 @@ namespace MKTO.Server.ServiceTask
                     bool finalRunResult = true;
                     
                     curData.integrationDtlId = Id.Create(dr["Marketo_Integration_Detail_Id"]);
+                    curData.isMarketoActivity = TypeConvert.ToBoolean(dr["Is_Marketo_Activity"]);
                     
                     ApplicationLog.WriteToLog(curData.configurationId, "Integration started", System.Diagnostics.EventLogEntryType.Information,
                         "Marketo_Integration_Detail", curData.integrationDtlId.ToString(),
@@ -1209,6 +1211,8 @@ namespace MKTO.Server.ServiceTask
 
                             if (TypeConvert.ToBoolean(nodeList.Item(0).InnerText) == true)
                             {
+                                error606 = false;
+                                proceedToNextRecord = true;
 
                                 if (LoggingLevel >= 1)
                                     ApplicationLog.WriteToLog(curData.configurationId, "Change count: " + xmlRecordList.Count.ToString(), System.Diagnostics.EventLogEntryType.Information,
@@ -1355,25 +1359,48 @@ namespace MKTO.Server.ServiceTask
                                                                     ApplicationLog.WriteToLog(curData.configurationId,
                                                                         "Updating " + curData.pivObject + "." + curData.fieldMapping[xmlFieldInfo["name"].InnerText] + " = " + xmlFieldInfo["value"].InnerText, System.Diagnostics.EventLogEntryType.Information,
                                                                                             curData.mktoObject, marketoGUID, "MKTO.Server.ServiceTask.Integration", Method, null);
-                                                                if (fldType.Name == "DateTime")
+
+                                                                try
                                                                 {
-                                                                    curRecord[curData.fieldMapping[xmlFieldInfo["name"].InnerText]] = TypeConvert.ToDateTime(xmlFieldInfo["value"].InnerText);
+                                                                    if (fldType.Name == "DateTime")
+                                                                    {
+                                                                        curRecord[curData.fieldMapping[xmlFieldInfo["name"].InnerText]] = TypeConvert.ToDateTime(xmlFieldInfo["value"].InnerText);
+                                                                    }
+                                                                    else if (fldType.Name == "Int32" || fldType.Name == "Int64")
+                                                                    {
+                                                                        curRecord[curData.fieldMapping[xmlFieldInfo["name"].InnerText]] = xmlFieldInfo["value"].InnerText;
+                                                                    }
+                                                                    else if (fldType.Name == "Double")
+                                                                    {
+                                                                        curRecord[curData.fieldMapping[xmlFieldInfo["name"].InnerText]] = TypeConvert.ToDouble(xmlFieldInfo["value"].InnerText);
+                                                                    }
+                                                                    else if (fldType.Name == "Boolean")
+                                                                    {
+                                                                        curRecord[curData.fieldMapping[xmlFieldInfo["name"].InnerText]] = TypeConvert.ToBoolean(xmlFieldInfo["value"].InnerText);
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        // Compare the length of data coming in from Marketo with the Pivotal field data length.
+                                                                        // If the data is longer than the Pivotal field, trim it to fit in the Pivotal field
+                                                                        int pivFieldLength = curRecord.Table.Columns[curData.fieldMapping[xmlFieldInfo["name"].InnerText]].MaxLength;
+                                                                        int marketoDataLength = xmlFieldInfo["value"].InnerText.Length;
+
+                                                                        if (marketoDataLength > pivFieldLength)
+                                                                        {
+                                                                            curRecord[curData.fieldMapping[xmlFieldInfo["name"].InnerText]] = xmlFieldInfo["value"].InnerText.Substring(0,pivFieldLength-1);
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            curRecord[curData.fieldMapping[xmlFieldInfo["name"].InnerText]] = xmlFieldInfo["value"].InnerText;
+                                                                        }
+                                                                    }
                                                                 }
-                                                                else if (fldType.Name == "Int32" || fldType.Name == "Int64")
+                                                                catch (Exception exc)
                                                                 {
-                                                                    curRecord[curData.fieldMapping[xmlFieldInfo["name"].InnerText]] = xmlFieldInfo["value"].InnerText;
-                                                                }
-                                                                else if (fldType.Name == "Double")
-                                                                {
-                                                                    curRecord[curData.fieldMapping[xmlFieldInfo["name"].InnerText]] = TypeConvert.ToDouble(xmlFieldInfo["value"].InnerText);
-                                                                }
-                                                                else if (fldType.Name == "Boolean")
-                                                                {
-                                                                    curRecord[curData.fieldMapping[xmlFieldInfo["name"].InnerText]] = TypeConvert.ToBoolean(xmlFieldInfo["value"].InnerText);
-                                                                }
-                                                                else
-                                                                {
-                                                                    curRecord[curData.fieldMapping[xmlFieldInfo["name"].InnerText]] = xmlFieldInfo["value"].InnerText;
+                                                                    string errMsg = string.Format("Error processing {0}: Marketo GUID {1} Pivotal field {2} ", curData.pivObject,marketoGUID, curData.fieldMapping[xmlFieldInfo["name"].InnerText]);
+                                                                    ApplicationLog.WriteToLog(curData.configurationId, errMsg, System.Diagnostics.EventLogEntryType.Error,
+                                                                        "Marketo_Integration_Detail", integrationDetailId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, exc.Message);
+
                                                                 }
                                                             }
                                                         }
@@ -1440,7 +1467,26 @@ namespace MKTO.Server.ServiceTask
                                             }
 
                                             //Save changes to Pivotal
-                                            this.DefaultDataAccess.SaveDataRow(curRecord);
+
+                                            DataRow drSavedDataRow = null;
+                                            try
+                                            {
+                                                drSavedDataRow = this.DefaultDataAccess.SaveDataRow(curRecord);
+                                            }
+                                            catch (Exception exc)
+                                            {
+                                                ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
+                                                    "Marketo_Integration_Detail", integrationDetailId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, exc.Message);
+
+                                            }
+                                            try
+                                            {
+                                                curData.pivRecordId = Id.Create(drSavedDataRow[curData.pivObject + "_Id"]);
+                                            }
+                                            catch (Exception e)
+                                            { }
+
+
                                             if (LoggingLevel >= 1)
                                             {
                                                 if (curData.pivRecordId != null)
@@ -1529,8 +1575,17 @@ namespace MKTO.Server.ServiceTask
                                                         }
                                                     }
 
-                                                    //Save changes to Pivotal
-                                                    this.DefaultDataAccess.SaveDataRow(curRecord);
+                                                    try
+                                                    {
+                                                        //Save changes to Pivotal
+                                                        this.DefaultDataAccess.SaveDataRow(curRecord);
+                                                    }
+                                                    catch (Exception exc)
+                                                    {
+                                                        ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
+                                                            "Marketo_Integration_Detail", integrationDetailId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, exc.Message);
+
+                                                    }
                                                 }
                                             }
                                         }
@@ -1560,12 +1615,29 @@ namespace MKTO.Server.ServiceTask
                                 if (error606)
                                 {
                                     System.Threading.Thread.Sleep(3000);
-                                    ApplicationLog.WriteToLog(curData.configurationId, "Attempting to reprocess: record id: " + curData.pivRecordId.ToString(),
-                                        System.Diagnostics.EventLogEntryType.Information,
-                                        curData.mktoObject, curData.pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, "");
+                                    if (curData.isMarketoActivity || curData.marketoActivityId != null)
+                                    {
+                                        ApplicationLog.WriteToLog(curData.configurationId, "Attempting to reprocess Marketo activity id: " + curData.marketoActivityId,
+                                            System.Diagnostics.EventLogEntryType.Information,
+                                            curData.mktoObject, curData.marketoActivityId, "MKTO.Server.ServiceTask.Integration", Method, "");
+                                    }
+                                    else if (curData.pivRecordId !=null)
+                                    {
+                                        ApplicationLog.WriteToLog(curData.configurationId, "Attempting to reprocess record id: " + curData.pivRecordId.ToString(),
+                                            System.Diagnostics.EventLogEntryType.Information,
+                                            curData.mktoObject, curData.pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, "");
+
+                                    }
+                                    else
+                                    {
+                                        ApplicationLog.WriteToLog(curData.configurationId, "Attempting to reprocess",
+                                            System.Diagnostics.EventLogEntryType.Information,
+                                            curData.mktoObject, null, "MKTO.Server.ServiceTask.Integration", Method, "");
+                                    }
                                     proceedToNextRecord = false;
                                 }
                                 // Otherwise skip to the next record.
+                                else
                                 {
                                     proceedToNextRecord = true;
                                 }
@@ -2037,11 +2109,23 @@ namespace MKTO.Server.ServiceTask
                                 if (error606)
                                 {
                                     System.Threading.Thread.Sleep(3000);
-                                    ApplicationLog.WriteToLog(curData.configurationId, "Attempting to reprocess: record id: " + curData.pivRecordId.ToString(),
+                                    if (curData.pivRecordId != null)
+                                    {
+
+                                        ApplicationLog.WriteToLog(curData.configurationId, "Attempting to reprocess: record id: " + curData.pivRecordId.ToString(),
                                         System.Diagnostics.EventLogEntryType.Information,
                                         curData.mktoObject, curData.pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, "");
+                                    }
+                                    else
+                                    {
+                                        ApplicationLog.WriteToLog(curData.configurationId, "Attempting to reprocess: record id: " + curData.pivRecordId.ToString(),
+                                        System.Diagnostics.EventLogEntryType.Information,
+                                        curData.mktoObject, null, "MKTO.Server.ServiceTask.Integration", Method, "");
+
+                                    }
                                     proceedToNextRecord = false;
                                 }
+                                else
                                 // Otherwise skip to the next record.
                                 {
                                     proceedToNextRecord = true;
@@ -2321,6 +2405,7 @@ namespace MKTO.Server.ServiceTask
                                             curData.mktoObject, curData.pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, "");
                                         proceedToNextRecord = false;
                                     }
+                                    else
                                     // Otherwise skip to the next record.
                                     {
                                         proceedToNextRecord = true;

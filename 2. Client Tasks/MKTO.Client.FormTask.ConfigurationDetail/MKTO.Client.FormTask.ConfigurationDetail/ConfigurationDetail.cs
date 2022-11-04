@@ -191,7 +191,7 @@ namespace MKTO.Client.FormTasks
         public override bool SaveRecord()
         {
             //Reset Marketo Object value since field is actually on table
-            this.PrimaryDataRow["Marketo_Object"] = null;
+            //this.PrimaryDataRow["Marketo_Object"] = null;
             // TODO (PIV) If you do not have different business logic for AddRecord, you can remove the if - else block.
             if (this.FormData.RecordId == null)
             {

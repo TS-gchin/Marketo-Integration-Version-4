@@ -162,7 +162,7 @@ namespace MKTO.Client.FormTasks
                 // The first call, UpdatePivotalRecordFromNew checks to see if there are any newly created leads Last_Run_Date_Time
                 // The second call, UpdatePivotalRecord checks to see what updates have been made since Last_Run_Date_Time
 
-                if (marketoObject.ToUpper() == "LEAD")
+                if (marketoObject.ToUpper() == "LEADS")
                 {
                     runResult1 = (bool)Globals.SystemClient.ExecuteServerTask("MKTO.Server.ServiceTask.Integration", "UpdatePivotalRecordFromNew",
                         new Type[] { typeof(Id) },
@@ -202,9 +202,12 @@ namespace MKTO.Client.FormTasks
                 // The first call, UpdatePivotalRecordFromNew checks to see if there are any newly created leads Last_Run_Date_Time
                 // The second call, UpdatePivotalRecord checks to see what updates have been made since Last_Run_Date_Time
 
-                runResult2=(bool)Globals.SystemClient.ExecuteServerTask("MKTO.Server.ServiceTask.Integration", "UpdatePivotalRecordFromNew",
+                if (marketoObject.ToUpper() == "LEADS")
+                {
+                    runResult2 = (bool)Globals.SystemClient.ExecuteServerTask("MKTO.Server.ServiceTask.Integration", "UpdatePivotalRecordFromNew",
                     new Type[] { typeof(Id) },
                     new object[] { Id.Create(this.PrimaryDataRow["Marketo_Integration_Detail_Id"]) });
+                }
                 runResult3=(bool)Globals.SystemClient.ExecuteServerTask("MKTO.Server.ServiceTask.Integration", "UpdatePivotalRecord",
                     new Type[] { typeof(Id) },
                     new object[] { Id.Create(this.PrimaryDataRow["Marketo_Integration_Detail_Id"]) });
