@@ -33,6 +33,13 @@ namespace MKTO.Server.ServiceTask
     /// </history>
     public class Logging : AbstractApplicationServerTask
     {
+        enum LogType  {Undefined, WriteToFile,WriteToDatabase };
+        bool LogEnable = false;
+        LogType logType = LogType.Undefined;
+        string connectionString = "";
+        string logFilePath = "";
+        string logTableName = "";
+
         #region Constructor
         /// <summary>
         /// Initialize the instance of AppServiceServerTask class and set the default resource bundle to 'xxxxxx' LD Group.
@@ -56,33 +63,51 @@ namespace MKTO.Server.ServiceTask
         [TaskExecute]
         public virtual void WriteToLog(Id integrationId, string messageToLog, EventLogEntryType palEventType, string tableName, string recordId, string className, string methodName, string otherInformation)
         {
-            // Retrieve logging information
-            DataRow drIntegration = this.DefaultDataAccess.GetDataRow("Marketo_Configuration", integrationId,
-                new string[] { "Log_DB_Conn_String", "Log_DB_Table_Name", "Log_File_Location", "Log_Type", "Log_Enable" });
-
-            if (drIntegration != null)
+            if (logType == LogType.Undefined)
             {
-                //Check to see if logging is enabled
-                if (TypeConvert.ToBoolean(drIntegration["Log_Enable"]))
+                // Retrieve logging information
+                DataRow drIntegration = this.DefaultDataAccess.GetDataRow("Marketo_Configuration", integrationId,
+                    new string[] { "Log_DB_Conn_String", "Log_DB_Table_Name", "Log_File_Location", "Log_Type", "Log_Enable" });
+
+                if (drIntegration != null)
                 {
-                    //Determine which type of logging is enabled
-                    switch(TypeConvert.ToString(drIntegration["Log_Type"]).ToLower())
+                    //Check to see if logging is enabled
+                    if (TypeConvert.ToBoolean(drIntegration["Log_Enable"]))
                     {
-                        case "file":
-                            string logLine = GetLogLine(messageToLog, palEventType, tableName, recordId, className, methodName, otherInformation);
-                            WriteLogToFile(TypeConvert.ToString(drIntegration["Log_File_Location"]),
-                                logLine);
-                            break;
-                        case "database":
-                            string sqlString = GetInsertStatement(TypeConvert.ToString(drIntegration["Log_DB_Table_Name"]),
-                                messageToLog, palEventType, tableName, recordId, className, methodName, otherInformation);
-                            WriteLogToDB(TypeConvert.ToString(drIntegration["Log_DB_Conn_String"]),
-                                sqlString);
-                            break;
-                        default:
-                            break;
+                        //Determine which type of logging is enabled
+                        switch (TypeConvert.ToString(drIntegration["Log_Type"]).ToLower())
+                        {
+                            case "file":
+                                logType = LogType.WriteToFile;
+                                logFilePath = TypeConvert.ToString(drIntegration["Log_File_Location"]);
+                                string logLine = GetLogLine(messageToLog, palEventType, tableName, recordId, className, methodName, otherInformation);
+                                WriteLogToFile(logFilePath,logLine);
+                                break;
+                            case "database":
+                                logType = LogType.WriteToDatabase;
+                                logTableName = TypeConvert.ToString(drIntegration["Log_DB_Table_Name"]);
+                                connectionString = TypeConvert.ToString(drIntegration["Log_DB_Conn_String"]);
+
+                                string sqlString = GetInsertStatement(logTableName,
+                                    messageToLog, palEventType, tableName, recordId, className, methodName, otherInformation);
+                                WriteLogToDB(connectionString,sqlString);
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
+            }
+            else if (logType==LogType.WriteToDatabase)
+            {
+                string sqlString = GetInsertStatement(logTableName,
+                    messageToLog, palEventType, tableName, recordId, className, methodName, otherInformation);
+                WriteLogToDB(connectionString,sqlString);
+            }
+            else if (logType==LogType.WriteToFile)
+            {
+                string logLine = GetLogLine(messageToLog, palEventType, tableName, recordId, className, methodName, otherInformation);
+                WriteLogToFile(logFilePath, logLine);
             }
         }
         #endregion

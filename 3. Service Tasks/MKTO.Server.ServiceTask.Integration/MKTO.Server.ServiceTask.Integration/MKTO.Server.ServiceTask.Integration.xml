@@ -128,13 +128,15 @@
             #Revision   Date    Author  Description
             </history>
         </member>
-        <member name="M:MKTO.Server.ServiceTask.Integration.SetPivotalExternalSourceId(System.String,CdcSoftware.Pivotal.Engine.Id,System.String)">
+        <member name="M:MKTO.Server.ServiceTask.Integration.SetPivotalExternalSourceId(System.String,CdcSoftware.Pivotal.Engine.Id,System.String,System.String,CdcSoftware.Pivotal.Engine.Id)">
             <summary>
                 Sets the value of the Pivotal external source id with the Marketo Id
             </summary>
             <param name="pivObject">Pivotal object</param>
             <param name="pivRecordId">Pivotal Record Id</param>
             <param name="externalSourceId"></param>
+            <param name="marketoFieldName"></param>
+            <param name="configurationId"></param>
             <history>
             #Revision   Date    Author  Description
             </history>
@@ -163,29 +165,21 @@
             #Revision   Date    Author  Description
             </history>
         </member>
-        <member name="M:MKTO.Server.ServiceTask.Integration.SSUpdatePivotalRecord">
-            <summary>
-                This method is used to update the Pivotal records from Marketo
-            </summary>
-            <history>
-            #Revision   Date    Author  Description
-            </history>
-        </member>
-        <member name="M:MKTO.Server.ServiceTask.Integration.SSUpdateMarketoRecord">
-            <summary>
-                This method is used to update the Pivotal records from Marketo
-            </summary>
-            <history>
-            #Revision   Date    Author  Description
-            </history>
-        </member>
         <member name="M:MKTO.Server.ServiceTask.Integration.UpdatePivotalRecord(CdcSoftware.Pivotal.Engine.Id)">
             <summary>
                 This method is used to update the Pivotal records from Marketo
             </summary>
-            <history>
             <paramref name="integrationDetailId">Marketo_Detail_Integration_Id</paramref>
-            #Revision   Date    Author  Description
+            <history>
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.NewlyCreatedLeads(CdcSoftware.Pivotal.Engine.Id)">
+            <summary>
+                Return a list of newly created leads.  To see which leads are newly created,
+                we query Narketo for activity type 12, which is New Lead
+            </summary>
+            <paramref name="integrationDetailId">Marketo_Detail_Integration_Id</paramref>
+            <history>
             </history>
         </member>
         <member name="M:MKTO.Server.ServiceTask.Integration.UpdatePivotalRecordFromNew(CdcSoftware.Pivotal.Engine.Id)">
@@ -195,6 +189,22 @@
             </summary>
             <history>
             <paramref name="integrationDetailId">Marketo_Detail_Integration_Id</paramref>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.SaveRecordInPivotal(System.Data.DataRow)">
+            <summary>
+                Save the datarow in Pivotal.
+                This method exists to be called via this.SystemServer.ExecuteServerTask
+                from UpdatePivotalRecord and UpdatePivotalRecordFromNew so that the row 
+                can be saved as a separate transaction and not trigger the warning 
+                message in the Event Viewer saying this operation should be performed within a transaction
+                
+                The record is returned as a string because Id cannot be returned when calling 
+                this.SystemServer.ExecuteServerTask
+            </summary>
+            <history>
+            <paramref name="curRecord"/>
             #Revision   Date    Author  Description
             </history>
         </member>
@@ -218,6 +228,23 @@
         <member name="M:MKTO.Server.ServiceTask.Integration.GetMarketoActivityFields(CdcSoftware.Pivotal.Engine.Id,System.String)">
             <summary>
                 This method is used to retrieve Marketo fields from specified object
+            </summary>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.SetApplicationLog">
+            <summary>
+                Instantiate the ApplicationLog object if it hasn't already been instantiated
+            </summary>
+            <history>
+            #Revision   Date    Author  Description
+            </history>
+        </member>
+        <member name="M:MKTO.Server.ServiceTask.Integration.parseMarketoErrors(System.Xml.XmlDocument)">
+            <summary>
+                Parse the message returned by Marketo to return
+                any errors returned by Marketo
             </summary>
             <history>
             #Revision   Date    Author  Description

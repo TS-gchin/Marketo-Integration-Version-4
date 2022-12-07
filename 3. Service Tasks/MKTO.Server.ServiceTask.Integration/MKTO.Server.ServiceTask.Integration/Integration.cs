@@ -562,33 +562,30 @@ namespace MKTO.Server.ServiceTask
         /// <param name="pivObject">Pivotal object</param>
         /// <param name="pivRecordId">Pivotal Record Id</param>
         /// <param name="externalSourceId"></param>
+        /// <param name="marketoFieldName"></param>
+        /// <param name="configurationId"></param>
         /// <history>
         /// #Revision   Date    Author  Description
         /// </history>
-        protected virtual void SetPivotalExternalSourceId(string pivObject, Id pivRecordId, string externalSourceId)
+        [TaskExecute]
+        protected virtual void SetPivotalExternalSourceId(string pivObject, Id pivRecordId, string externalSourceId, string marketoFieldName, Id configurationId)
         {
             const string Method = "SetPivotalExternalSourceId";
             try
             {
+
                 DataRow drPivRecord = this.DefaultDataAccess.GetDataRow(pivObject, pivRecordId,
-                    new string[] { curData.pivPKFieldName });
+                new string[] { marketoFieldName });
 
                 if (drPivRecord != null)
                 {
-                    drPivRecord[curData.pivPKFieldName] = externalSourceId;
+                    drPivRecord[marketoFieldName] = externalSourceId;
                     this.DefaultDataAccess.SaveDataRow(drPivRecord);
-                }
-                if (LoggingLevel >= 2)
-                {
-                    ApplicationLog.WriteToLog(ConfigurationId, "Updated field " + curData.pivPKFieldName + " with value " + externalSourceId, System.Diagnostics.EventLogEntryType.Information,
-                            pivObject, pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, null);
                 }
             }
             catch (Exception exc)
             {
-                ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
-                        pivObject, pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration",
-                        "SetPivotalExternalSourceId", exc.Message);
+                throw exc;
             }
         }
 
@@ -650,14 +647,14 @@ namespace MKTO.Server.ServiceTask
             try
             {
                 SetApplicationLog();
-                if (LoggingLevel >= 2)
-                {
-                    if (OKToUpdateLastRunDate == false)
-                    {
-                        ApplicationLog.WriteToLog(ConfigurationId, "LastRunDate not updated  ", System.Diagnostics.EventLogEntryType.Information,
-                                null, null, "MKTO.Server.ServiceTask.Integration", Method, null);
-                    }
-                }
+                //if (LoggingLevel >= 2)
+                //{
+                //    if (OKToUpdateLastRunDate == false)
+                //    {
+                //        ApplicationLog.WriteToLog(ConfigurationId, "LastRunDate not updated  ", System.Diagnostics.EventLogEntryType.Information,
+                //                null, null, "MKTO.Server.ServiceTask.Integration", Method, null);
+                //    }
+                //}
 
                 if (OKToUpdateLastRunDate)
                 {
@@ -669,11 +666,11 @@ namespace MKTO.Server.ServiceTask
                         drIntegration["Last_Run_Date_Time"] = DateTime.Now;
                         this.DefaultDataAccess.SaveDataRow(drIntegration);
                     }
-                    if (LoggingLevel >= 2)
-                    {
-                        ApplicationLog.WriteToLog(ConfigurationId, "Set Last_Run_Date_Time on record  " + integrationDetailId.ToString() + " to " + TypeConvert.ToString(curData.currentDateTime), System.Diagnostics.EventLogEntryType.Information,
-                                "Marketo_Integration_Detail", integrationDetailId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, null);
-                    }
+                    //if (LoggingLevel >= 2)
+                    //{
+                    //    ApplicationLog.WriteToLog(ConfigurationId, "Set Last_Run_Date_Time on record  " + integrationDetailId.ToString() + " to " + TypeConvert.ToString(DateTime.Now), System.Diagnostics.EventLogEntryType.Information,
+                    //            "Marketo_Integration_Detail", integrationDetailId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, null);
+                    //}
                 }
             }
             catch (Exception exc)
@@ -758,7 +755,8 @@ namespace MKTO.Server.ServiceTask
                         //Update last time integration was run
                         if (finalRunResult == true)
                         {
-                            UpdateLastRunDate();
+                            //UpdateLastRunDate();
+                            this.SystemServer.ExecuteServerTask("MKTO.Server.ServiceTask.Integration", "UpdateLastRunDate", new Type[] { typeof(Id) }, new object[] { curData.integrationDtlId }, true);
                         }
                     }
                     catch (Exception exc)
@@ -774,328 +772,333 @@ namespace MKTO.Server.ServiceTask
         ///     This method is used to update the Pivotal records from Marketo
         /// </summary>
         /// <history>
-        /// #Revision   Date    Author  Description
+        /// #Revision   Date            Author  Description
+        /// 6.0.0.57    2022-11-20      GC      Depracateed
         /// </history>
-        [TaskExecute]
-        public virtual void SSUpdatePivotalRecord()
-        {
-            try
-            {
-                if (ApplicationLog == null)
-                    ApplicationLog = (Logging)this.SystemServer.GetMetaItem<ServerTask>("MKTO.Server.ServiceTask.Logging").CreateInstance();
-                Id integrationDetailId = this.DefaultDataAccess.SqlFind("Marketo_Integration_Detail", "Active", true);
-                if (integrationDetailId == null)
-                    return;
-                GetIntegrationDtlData(integrationDetailId);
+        //[TaskExecute]
+        //public virtual void SSUpdatePivotalRecord()
+        //{
+        //    try
+        //    {
+        //        if (ApplicationLog == null)
+        //            ApplicationLog = (Logging)this.SystemServer.GetMetaItem<ServerTask>("MKTO.Server.ServiceTask.Logging").CreateInstance();
+        //        Id integrationDetailId = this.DefaultDataAccess.SqlFind("Marketo_Integration_Detail", "Active", true);
+        //        if (integrationDetailId == null)
+        //            return;
+        //        GetIntegrationDtlData(integrationDetailId);
 
-                if (curData.mktoOAuthToken.Length > 0)
-                {
-                    // Populate field mapping object. Records are retrieved from Marketo
-                    GetFieldMapping("Marketo");
+        //        if (curData.mktoOAuthToken.Length > 0)
+        //        {
+        //            // Populate field mapping object. Records are retrieved from Marketo
+        //            GetFieldMapping("Marketo");
 
-                    // Get list of fields to retrieve from Marketo
-                    string fieldListing = "";
-                    int i = 0;
-                    foreach (string fKey in curData.fieldMapping.Keys)
-                    {
-                        if (i > 0)
-                            fieldListing += ",";
-                        fieldListing += fKey;
-                        i++;
-                    }
+        //            // Get list of fields to retrieve from Marketo
+        //            string fieldListing = "";
+        //            int i = 0;
+        //            foreach (string fKey in curData.fieldMapping.Keys)
+        //            {
+        //                if (i > 0)
+        //                    fieldListing += ",";
+        //                fieldListing += fKey;
+        //                i++;
+        //            }
 
-                    DateTime sinceDateTime = curData.currentDateTime;
-                    string pagingToken = GetPagingToken(sinceDateTime);
-                    bool moreResults = false;
+        //            DateTime sinceDateTime = curData.currentDateTime;
+        //            string pagingToken = GetPagingToken(sinceDateTime);
+        //            bool moreResults = false;
 
-                    do
-                    {
-                        //string mktoURL = curData.mktoRestURL + "/v1/activities/leadchanges.json?access_token=" + curData.mktoOAuthToken
-                        //    + "&sinceDatetime=" + sinceDateTime.ToString("yyyy-MM-dd'T'HH:mm:ssZ") +
-                        //    "&nextPageToken=" + pagingToken + "&fields=" + fieldListing;
-                        string mktoURL = curData.mktoRestURL + "/v1/activities/leadchanges.json"; 
-                        string mktoURLParams = "&sinceDatetime=" + sinceDateTime.ToString("yyyy-MM-dd'T'HH:mm:ssZ") + "&nextPageToken=" + pagingToken + "&fields=" + fieldListing;
-                        XmlDocument xDoc = utility.CallMarketoRestAPI(mktoURL, mktoURLParams,String.Empty, String.Empty);
+        //            do
+        //            {
+        //                //string mktoURL = curData.mktoRestURL + "/v1/activities/leadchanges.json?access_token=" + curData.mktoOAuthToken
+        //                //    + "&sinceDatetime=" + sinceDateTime.ToString("yyyy-MM-dd'T'HH:mm:ssZ") +
+        //                //    "&nextPageToken=" + pagingToken + "&fields=" + fieldListing;
+        //                string mktoURL = curData.mktoRestURL + "/v1/activities/leadchanges.json"; 
+        //                string mktoURLParams = "&sinceDatetime=" + sinceDateTime.ToString("yyyy-MM-dd'T'HH:mm:ssZ") + "&nextPageToken=" + pagingToken + "&fields=" + fieldListing;
+        //                XmlDocument xDoc = utility.CallMarketoRestAPI(mktoURL, mktoURLParams,String.Empty, String.Empty);
 
-                        XmlNodeList xmlRecordList = xDoc.SelectNodes("root/result/item");
+        //                XmlNodeList xmlRecordList = xDoc.SelectNodes("root/result/item");
 
-                        //Get next paging token
-                        pagingToken = TypeConvert.ToString(xDoc.SelectSingleNode("root/nextPageToken").InnerText);
-                        //Check to see if there are more pages
-                        moreResults = TypeConvert.ToBoolean(xDoc.SelectSingleNode("root/moreResult").InnerText);
+        //                //Get next paging token
+        //                pagingToken = TypeConvert.ToString(xDoc.SelectSingleNode("root/nextPageToken").InnerText);
+        //                //Check to see if there are more pages
+        //                moreResults = TypeConvert.ToBoolean(xDoc.SelectSingleNode("root/moreResult").InnerText);
 
-                        //Get list of fields from Pivotal
-                        string[] pivFields = new string[curData.fieldMapping.Count];
-                        curData.fieldMapping.Values.CopyTo(pivFields, 0);
+        //                //Get list of fields from Pivotal
+        //                string[] pivFields = new string[curData.fieldMapping.Count];
+        //                curData.fieldMapping.Values.CopyTo(pivFields, 0);
 
-                        //Cycle through all records and update corresponding Pivotal record
-                        foreach (XmlNode xmlRecord in xmlRecordList)
-                        {
-                            //Get Marketo Id from XML
-                            int marketoId = 0;
-                            if (xmlRecord["leadId"] != null)
-                                marketoId = TypeConvert.ToInt32(xmlRecord["leadId"].InnerText);
+        //                //Cycle through all records and update corresponding Pivotal record
+        //                foreach (XmlNode xmlRecord in xmlRecordList)
+        //                {
+        //                    //Get Marketo Id from XML
+        //                    int marketoId = 0;
+        //                    if (xmlRecord["leadId"] != null)
+        //                        marketoId = TypeConvert.ToInt32(xmlRecord["leadId"].InnerText);
 
-                            //Get date the record was updated
-                            DateTime lastUpdated = curData.lastRunDateTime;
-                            if (xmlRecord["activityDate"] != null)
-                                lastUpdated = TypeConvert.ToDateTime(xmlRecord["activityDate"].InnerText);
+        //                    //Get date the record was updated
+        //                    DateTime lastUpdated = curData.lastRunDateTime;
+        //                    if (xmlRecord["activityDate"] != null)
+        //                        lastUpdated = TypeConvert.ToDateTime(xmlRecord["activityDate"].InnerText);
 
-                            //Only update if Id is present and it was changed between the date range
-                            if (marketoId > 0 && lastUpdated.CompareTo(curData.lastRunDateTime) > 0 && lastUpdated.CompareTo(curData.currentDateTime) < 0)
-                            {
-                                //Get list of updated fields from Marketo
-                                XmlNodeList xmlFields = xmlRecord.SelectNodes("fields/item");
+        //                    //Only update if Id is present and it was changed between the date range
+        //                    if (marketoId > 0 && lastUpdated.CompareTo(curData.lastRunDateTime) > 0 && lastUpdated.CompareTo(curData.currentDateTime) < 0)
+        //                    {
+        //                        //Get list of updated fields from Marketo
+        //                        XmlNodeList xmlFields = xmlRecord.SelectNodes("fields/item");
 
-                                if (xmlFields.Count > 0)
-                                {
-                                    //Check to see if record exists in Contacts and Leads
-                                    DataTable pivRecord = this.DefaultDataAccess.GetDataTable("Marketo: Lead for Marketo Id ?",
-                                        new object[] { marketoId },
-                                        pivFields);
+        //                        if (xmlFields.Count > 0)
+        //                        {
+        //                            //Check to see if record exists in Contacts and Leads
+        //                            DataTable pivRecord = this.DefaultDataAccess.GetDataTable("Marketo: Lead for Marketo Id ?",
+        //                                new object[] { marketoId },
+        //                                pivFields);
 
-                                    if (pivRecord.Rows.Count == 0)
-                                    {
-                                        pivRecord = this.DefaultDataAccess.GetDataTable("Marketo: Contact for Marketo Id ?",
-                                        new object[] { marketoId },
-                                        pivFields);
-                                    }
+        //                            if (pivRecord.Rows.Count == 0)
+        //                            {
+        //                                pivRecord = this.DefaultDataAccess.GetDataTable("Marketo: Contact for Marketo Id ?",
+        //                                new object[] { marketoId },
+        //                                pivFields);
+        //                            }
 
-                                    DataRow curRecord;
+        //                            DataRow curRecord;
 
-                                    if (pivRecord.Rows.Count == 0)
-                                    {
-                                        //If record doesn't exist, create Lead in Pivotal
-                                        curRecord = this.DefaultDataAccess.GetNewDataRow(curData.pivObject, pivFields);
-                                    }
-                                    else
-                                    {
-                                        //Update existing record
-                                        curRecord = pivRecord.Rows[0];
-                                    }
+        //                            if (pivRecord.Rows.Count == 0)
+        //                            {
+        //                                //If record doesn't exist, create Lead in Pivotal
+        //                                curRecord = this.DefaultDataAccess.GetNewDataRow(curData.pivObject, pivFields);
+        //                            }
+        //                            else
+        //                            {
+        //                                //Update existing record
+        //                                curRecord = pivRecord.Rows[0];
+        //                            }
 
 
-                                    //Cycle through fields in XML
-                                    foreach (XmlNode xmlFieldInfo in xmlFields)
-                                    {
-                                        //If column exists in mapping, update value
-                                        if (curData.fieldMapping.ContainsKey(xmlFieldInfo["name"].InnerText))
-                                        {
-                                            if (pivRecord.Columns.Contains(curData.fieldMapping[xmlFieldInfo["name"].InnerText]))
-                                            {
-                                                curRecord[curData.fieldMapping[xmlFieldInfo["name"].InnerText]] = xmlFieldInfo["newValue"].InnerText;
-                                            }
-                                        }
-                                    }
-                                    //Save changes to Pivotal
-                                    this.DefaultDataAccess.SaveDataRow(curRecord);
-                                }
-                                else
-                                {
-                                    //Check to see if new record was added to Marketo
-                                    xmlFields = xmlRecord.SelectNodes("attributes/item");
+        //                            //Cycle through fields in XML
+        //                            foreach (XmlNode xmlFieldInfo in xmlFields)
+        //                            {
+        //                                //If column exists in mapping, update value
+        //                                if (curData.fieldMapping.ContainsKey(xmlFieldInfo["name"].InnerText))
+        //                                {
+        //                                    if (pivRecord.Columns.Contains(curData.fieldMapping[xmlFieldInfo["name"].InnerText]))
+        //                                    {
+        //                                        curRecord[curData.fieldMapping[xmlFieldInfo["name"].InnerText]] = xmlFieldInfo["newValue"].InnerText;
+        //                                    }
+        //                                }
+        //                            }
+        //                            //Save changes to Pivotal
+        //                            this.DefaultDataAccess.SaveDataRow(curRecord);
+        //                        }
+        //                        else
+        //                        {
+        //                            //Check to see if new record was added to Marketo
+        //                            xmlFields = xmlRecord.SelectNodes("attributes/item");
 
-                                    //Cycle through fields in XML
-                                    foreach (XmlNode xmlFieldInfo in xmlFields)
-                                    {
-                                        //Check to see if it is a new record
-                                        if (xmlFieldInfo["name"].InnerText == "Source Type" && xmlFieldInfo["value"].InnerText == "New person")
-                                        {
-                                            //Retrieve Lead record
-                                            //mktoURL = curData.mktoRestURL + "/v1/lead/" + marketoId + ".json?access_token="
-                                            //    + curData.mktoOAuthToken;
-                                            mktoURL = curData.mktoRestURL + "/v1/lead/" + marketoId;
+        //                            //Cycle through fields in XML
+        //                            foreach (XmlNode xmlFieldInfo in xmlFields)
+        //                            {
+        //                                //Check to see if it is a new record
+        //                                if (xmlFieldInfo["name"].InnerText == "Source Type" && xmlFieldInfo["value"].InnerText == "New person")
+        //                                {
+        //                                    //Retrieve Lead record
+        //                                    //mktoURL = curData.mktoRestURL + "/v1/lead/" + marketoId + ".json?access_token="
+        //                                    //    + curData.mktoOAuthToken;
+        //                                    mktoURL = curData.mktoRestURL + "/v1/lead/" + marketoId;
 
-                                            XmlDocument xDoc2 = utility.CallMarketoRestAPI(mktoURL, String.Empty,String.Empty, String.Empty);
+        //                                    XmlDocument xDoc2 = utility.CallMarketoRestAPI(mktoURL, String.Empty,String.Empty, String.Empty);
 
-                                            //Create new Lead in Pivotal
-                                            DataRow curRecord = this.DefaultDataAccess.GetNewDataRow(curData.pivObject, pivFields);
+        //                                    //Create new Lead in Pivotal
+        //                                    DataRow curRecord = this.DefaultDataAccess.GetNewDataRow(curData.pivObject, pivFields);
 
-                                            //Get list of updated fields from Marketo
-                                            XmlNode xmlNewFields = xDoc2.SelectSingleNode("root/result/item");
+        //                                    //Get list of updated fields from Marketo
+        //                                    XmlNode xmlNewFields = xDoc2.SelectSingleNode("root/result/item");
 
-                                            //Cycle through fields in mapping
-                                            foreach (KeyValuePair<string, string> kvp in curData.fieldMapping)
-                                            {
-                                                //If column exists in mapping, update value
-                                                if (xmlNewFields[kvp.Key].InnerText != "")
-                                                {
-                                                    if (curRecord.Table.Columns.Contains(kvp.Value))
-                                                    {
-                                                        curRecord[kvp.Value] = xmlNewFields[kvp.Key].InnerText;
-                                                    }
-                                                }
-                                            }
+        //                                    //Cycle through fields in mapping
+        //                                    foreach (KeyValuePair<string, string> kvp in curData.fieldMapping)
+        //                                    {
+        //                                        //If column exists in mapping, update value
+        //                                        if (xmlNewFields[kvp.Key].InnerText != "")
+        //                                        {
+        //                                            if (curRecord.Table.Columns.Contains(kvp.Value))
+        //                                            {
+        //                                                curRecord[kvp.Value] = xmlNewFields[kvp.Key].InnerText;
+        //                                            }
+        //                                        }
+        //                                    }
 
-                                            //Save changes to Pivotal
-                                            this.DefaultDataAccess.SaveDataRow(curRecord);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } while (moreResults);
+        //                                    //Save changes to Pivotal
+        //                                    this.DefaultDataAccess.SaveDataRow(curRecord);
+        //                                }
+        //                            }
+        //                        }
+        //                    }
+        //                }
+        //            } while (moreResults);
 
-                    //Update last time integration was run
-                    UpdateLastRunDate();
-                }
-            }
-            catch (Exception exc)
-            {
-                ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
-                    null, null, "MKTO.Server.ServiceTask.Integration", "UpdatePivotalRecord", exc.Message);
-            }
-        }
+        //            //Update last time integration was run
+        //            UpdateLastRunDate();
+        //        }
+        //    }
+        //    catch (Exception exc)
+        //    {
+        //        ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
+        //            null, null, "MKTO.Server.ServiceTask.Integration", "UpdatePivotalRecord", exc.Message);
+        //    }
+        //}
 
         /// <summary>
         ///     This method is used to update the Pivotal records from Marketo
         /// </summary>
         /// <history>
-        /// #Revision   Date    Author  Description
+        /// #Revision   Date            Author  Description
+        /// 6.0.0.57    2022-11-20      GC      Depracateed
         /// </history>
-        [TaskExecute]
-        public virtual void SSUpdateMarketoRecord()
-        {
-            try
-            {
-                if (ApplicationLog == null)
-                    ApplicationLog = (Logging)this.SystemServer.GetMetaItem<ServerTask>("MKTO.Server.ServiceTask.Logging").CreateInstance();
-                Id integrationDetailId = this.DefaultDataAccess.SqlFind("Marketo_Integration_Detail", "Active", true);
-                if (integrationDetailId == null)
-                    return;
-                GetIntegrationDtlData(integrationDetailId);
+        //[TaskExecute]
+        //public virtual void SSUpdateMarketoRecord()
+        //{
+        //    try
+        //    {
+        //        if (ApplicationLog == null)
+        //            ApplicationLog = (Logging)this.SystemServer.GetMetaItem<ServerTask>("MKTO.Server.ServiceTask.Logging").CreateInstance();
+        //        Id integrationDetailId = this.DefaultDataAccess.SqlFind("Marketo_Integration_Detail", "Active", true);
+        //        if (integrationDetailId == null)
+        //            return;
+        //        GetIntegrationDtlData(integrationDetailId);
 
-                if (curData.mktoOAuthToken.Length > 0)
-                {
-                    // Populate field mapping object. Records are retrieved from Pivotal
-                    GetFieldMapping("Pivotal");
+        //        if (curData.mktoOAuthToken.Length > 0)
+        //        {
+        //            // Populate field mapping object. Records are retrieved from Pivotal
+        //            GetFieldMapping("Pivotal");
 
-                    //Retrieve Pivotal records
-                    DataTable dtPivotal = this.DefaultDataAccess.GetDataTable(curData.pivQuery);
+        //            //Retrieve Pivotal records
+        //            DataTable dtPivotal = this.DefaultDataAccess.GetDataTable(curData.pivQuery);
 
-                    if (dtPivotal.Rows.Count > 0)
-                    {
-                        //Add record count to log
-                        //ApplicationLog.WriteToLog(curData.configurationId, dtPivotal.Rows.Count.ToString() + 
-                        //    " records will be transferred to Marketo", System.Diagnostics.EventLogEntryType.Information,
-                        //    null, null, "MKTO.Server.ServiceTask.Integration", "UpdateMarketoRecord", null);
+        //            if (dtPivotal.Rows.Count > 0)
+        //            {
+        //                //Add record count to log
+        //                //ApplicationLog.WriteToLog(curData.configurationId, dtPivotal.Rows.Count.ToString() + 
+        //                //    " records will be transferred to Marketo", System.Diagnostics.EventLogEntryType.Information,
+        //                //    null, null, "MKTO.Server.ServiceTask.Integration", "UpdateMarketoRecord", null);
 
-                        StringBuilder jsonRecord = new StringBuilder();
-                        StringBuilder jsonPrefix = new StringBuilder();
+        //                StringBuilder jsonRecord = new StringBuilder();
+        //                StringBuilder jsonPrefix = new StringBuilder();
 
-                        //Cycle through all Pivotal records
-                        foreach (DataRow dr in dtPivotal.Rows)
-                        {
-                            int i = 0;
-                            curData.pivRecordId = Id.Create(dr[curData.pivObject + "_Id"]);
+        //                //Cycle through all Pivotal records
+        //                foreach (DataRow dr in dtPivotal.Rows)
+        //                {
+        //                    int i = 0;
+        //                    curData.pivRecordId = Id.Create(dr[curData.pivObject + "_Id"]);
 
-                            //Create JSON string for transfer to Marketo
-                            jsonRecord.Clear();
-                            jsonPrefix.Clear();
-                            jsonRecord.AppendLine("\"input\":[{");
-                            foreach (DataColumn col in dtPivotal.Columns)
-                            {
-                                //Ignore any fields that are not part of the mapping
-                                if (curData.fieldMapping.ContainsKey(col.ColumnName))
-                                {
-                                    //Do not include external record Id in JSON, but retrieve value for URL
-                                    if (curData.fieldMapping[col.ColumnName] == curData.mktoPKFieldName)
-                                    {
-                                        jsonPrefix.AppendLine("{");
-                                        jsonPrefix.AppendLine("\"lookupField\":\"id\",");
-                                        curData.mktoRecordId = TypeConvert.ToString(dr[col.ColumnName]);
-                                    }
+        //                    //Create JSON string for transfer to Marketo
+        //                    jsonRecord.Clear();
+        //                    jsonPrefix.Clear();
+        //                    jsonRecord.AppendLine("\"input\":[{");
+        //                    foreach (DataColumn col in dtPivotal.Columns)
+        //                    {
+        //                        //Ignore any fields that are not part of the mapping
+        //                        if (curData.fieldMapping.ContainsKey(col.ColumnName))
+        //                        {
+        //                            //Do not include external record Id in JSON, but retrieve value for URL
+        //                            if (curData.fieldMapping[col.ColumnName] == curData.mktoPKFieldName)
+        //                            {
+        //                                jsonPrefix.AppendLine("{");
+        //                                jsonPrefix.AppendLine("\"lookupField\":\"id\",");
+        //                                curData.mktoRecordId = TypeConvert.ToString(dr[col.ColumnName]);
+        //                            }
 
-                                    if (i > 0)
-                                        jsonRecord.Append(",");
-                                    System.Type fldType = col.DataType;
-                                    if (fldType.Name == "DateTime")
-                                        //Format date field so Marketo will accept it
-                                        jsonRecord.AppendLine("\"" + curData.fieldMapping[col.ColumnName] + "\":\"" +
-                                            DateTime.Parse(TypeConvert.ToString(dr[col.ColumnName])).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ") + "\"");
-                                    else
-                                        jsonRecord.AppendLine("\"" + curData.fieldMapping[col.ColumnName] + "\":\"" + dr[col.ColumnName] + "\"");
-                                    i++;
-                                }
-                            }
+        //                            if (i > 0)
+        //                                jsonRecord.Append(",");
+        //                            System.Type fldType = col.DataType;
+        //                            if (fldType.Name == "DateTime")
+        //                                //Format date field so Marketo will accept it
+        //                                jsonRecord.AppendLine("\"" + curData.fieldMapping[col.ColumnName] + "\":\"" +
+        //                                    DateTime.Parse(TypeConvert.ToString(dr[col.ColumnName])).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ") + "\"");
+        //                            else
+        //                                jsonRecord.AppendLine("\"" + curData.fieldMapping[col.ColumnName] + "\":\"" + dr[col.ColumnName] + "\"");
+        //                            i++;
+        //                        }
+        //                    }
 
-                            if (jsonPrefix.ToString() == "")
-                                jsonPrefix.AppendLine("{");
+        //                    if (jsonPrefix.ToString() == "")
+        //                        jsonPrefix.AppendLine("{");
 
-                            jsonRecord.AppendLine("}] }");
+        //                    jsonRecord.AppendLine("}] }");
 
-                            //Setup URL for record update
-                            //string mktoURL = curData.mktoRestURL + "/v1/" + curData.mktoObject.ToLower() + ".json?access_token="
-                            //        + curData.mktoOAuthToken;
-                            string mktoURL = curData.mktoRestURL + "/v1/" + curData.mktoObject.ToLower() + ".json";
+        //                    //Setup URL for record update
+        //                    //string mktoURL = curData.mktoRestURL + "/v1/" + curData.mktoObject.ToLower() + ".json?access_token="
+        //                    //        + curData.mktoOAuthToken;
+        //                    string mktoURL = curData.mktoRestURL + "/v1/" + curData.mktoObject.ToLower() + ".json";
 
-                            XmlDocument xDoc = utility.CallMarketoRestAPI(mktoURL,string.Empty, "POST",
-                                jsonPrefix.ToString() + jsonRecord.ToString());
+        //                    XmlDocument xDoc = utility.CallMarketoRestAPI(mktoURL,string.Empty, "POST",
+        //                        jsonPrefix.ToString() + jsonRecord.ToString());
 
-                            XmlNodeList nodeList = xDoc.GetElementsByTagName("success");
+        //                    XmlNodeList nodeList = xDoc.GetElementsByTagName("success");
 
-                            if (TypeConvert.ToBoolean(nodeList.Item(0).InnerText) == true)
-                            {
-                                //Get details of result
-                                nodeList = xDoc.GetElementsByTagName("item");
+        //                    if (TypeConvert.ToBoolean(nodeList.Item(0).InnerText) == true)
+        //                    {
+        //                        //Get details of result
+        //                        nodeList = xDoc.GetElementsByTagName("item");
 
-                                //Check to see if updated or created
-                                XmlNode intResult = nodeList.Item(0);
+        //                        //Check to see if updated or created
+        //                        XmlNode intResult = nodeList.Item(0);
 
-                                if (intResult["status"].InnerText == "created")
-                                {
-                                    int mktoRecordId = TypeConvert.ToInt32(intResult["id"].InnerText);
-                                    //Update Pivotal record with Marketo Id
-                                    SetPivotalExternalSourceId(curData.pivObject, curData.pivRecordId, TypeConvert.ToString(mktoRecordId));
-                                }
-                                else if (intResult["status"].InnerText == "skipped")
-                                {
-                                    XmlNodeList xmlReason = intResult.SelectNodes("reasons");
-                                    string errorList = "Marketo Error: ";
-                                    foreach (XmlNode xmlReasonItem in xmlReason)
-                                    {
-                                        if (xmlReasonItem.SelectSingleNode("item/code") != null)
-                                            errorList += xmlReasonItem.SelectSingleNode("item/code").InnerText + ", "
-                                                + xmlReasonItem.SelectSingleNode("item/message").InnerText;
-                                    }
+        //                        if (intResult["status"].InnerText == "created")
+        //                        {
+        //                            int mktoRecordId = TypeConvert.ToInt32(intResult["id"].InnerText);
+        //                            //Update Pivotal record with Marketo Id
+        //                            SetPivotalExternalSourceId(curData.pivObject, curData.pivRecordId, TypeConvert.ToString(mktoRecordId));
+        //                        }
+        //                        else if (intResult["status"].InnerText == "skipped")
+        //                        {
+        //                            XmlNodeList xmlReason = intResult.SelectNodes("reasons");
+        //                            string errorList = "Marketo Error: ";
+        //                            foreach (XmlNode xmlReasonItem in xmlReason)
+        //                            {
+        //                                if (xmlReasonItem.SelectSingleNode("item/code") != null)
+        //                                    errorList += xmlReasonItem.SelectSingleNode("item/code").InnerText + ", "
+        //                                        + xmlReasonItem.SelectSingleNode("item/message").InnerText;
+        //                            }
 
-                                    // Report reason for skipping record
-                                    ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
-                                    null, null, "MKTO.Server.ServiceTask.Integration", "UpdateMarketoRecord", errorList);
-                                }
-                            }
-                            else
-                            {
-                                XmlNode xmlErrors = xDoc.SelectSingleNode("root/errors");
-                                XmlNodeList xmlErrorList = xmlErrors.SelectNodes("item");
-                                string errorList = "Marketo Error: ";
+        //                            // Report reason for skipping record
+        //                            ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
+        //                            null, null, "MKTO.Server.ServiceTask.Integration", "UpdateMarketoRecord", errorList);
+        //                        }
+        //                    }
+        //                    else
+        //                    {
+        //                        XmlNode xmlErrors = xDoc.SelectSingleNode("root/errors");
+        //                        XmlNodeList xmlErrorList = xmlErrors.SelectNodes("item");
+        //                        string errorList = "Marketo Error: ";
 
-                                foreach (XmlNode xmlError in xmlErrorList)
-                                {
-                                    errorList += xmlError["code"].InnerText + ", " + xmlError["message"].InnerText + " ";
-                                }
-                                // Put error message into error Log
-                                ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
-                                    null, null, "MKTO.Server.ServiceTask.Integration", "UpdateMarketoRecord", errorList);
-                            }
-                        }
-                    }
-                    //Update last time integration was run
-                    UpdateLastRunDate();
-                }
-            }
-            catch (Exception exc)
-            {
-                ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
-                    null, null, "MKTO.Server.ServiceTask.Integration", "UpdateMarketoRecord", exc.Message);
-            }
-        }
+        //                        foreach (XmlNode xmlError in xmlErrorList)
+        //                        {
+        //                            errorList += xmlError["code"].InnerText + ", " + xmlError["message"].InnerText + " ";
+        //                        }
+        //                        // Put error message into error Log
+        //                        ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
+        //                            null, null, "MKTO.Server.ServiceTask.Integration", "UpdateMarketoRecord", errorList);
+        //                    }
+        //                }
+        //            }
+        //            //Update last time integration was run
+        //            UpdateLastRunDate();
+        //        }
+        //    }
+        //    catch (Exception exc)
+        //    {
+        //        ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
+        //            null, null, "MKTO.Server.ServiceTask.Integration", "UpdateMarketoRecord", exc.Message);
+        //    }
+        //}
+
+
+
+
         /// <summary>
         ///     This method is used to update the Pivotal records from Marketo
         /// </summary>
-        /// <history>
         /// <paramref name="integrationDetailId">Marketo_Detail_Integration_Id</paramref>
-        /// #Revision   Date    Author  Description
+        /// <history>
         /// </history>
         [TaskExecute]
         public virtual bool UpdatePivotalRecord(Id integrationDetailId)
@@ -1151,10 +1154,18 @@ namespace MKTO.Server.ServiceTask
                             "Marketo_Integration_Detail", integrationDetailId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, "");
 
 
-                    do
+
+                    // Keep looping as long as there are results to process from the JSON call to Marketo
+                    // Each call to Marketo retrieves up to 300 results at a time
+                    // If the JSON message returns a node named moreResult, that means we need to continue
+                    // calling Marketo to get the next set of results
+
+                    do // while (moreResults)
                     {
                         string mktoURL = "";
                         string mktoParams = "";
+                        string strRecordId = "";
+
                         // Marketo has a limit where you can only make 100 API calls within 20 seconds.
                         // If you exceed that, you will get a 606 error.
                         // This while loop allows us to reprocess the record if we encounter a 606 error.  
@@ -1206,12 +1217,14 @@ namespace MKTO.Server.ServiceTask
 
                             XmlNodeList nodeList = xDoc.GetElementsByTagName("success");
                             bool error606 = false;
+                            bool error602 = false;
 
                             XmlNodeList xmlRecordList = xDoc.SelectNodes("root/result/item");
 
                             if (TypeConvert.ToBoolean(nodeList.Item(0).InnerText) == true)
                             {
                                 error606 = false;
+                                error602 = false;
                                 proceedToNextRecord = true;
 
                                 if (LoggingLevel >= 1)
@@ -1220,7 +1233,9 @@ namespace MKTO.Server.ServiceTask
 
                                 //Get next paging token
                                 pagingToken = TypeConvert.ToString(xDoc.SelectSingleNode("root/nextPageToken").InnerText);
-                                //Check to see if there are more pages
+                                
+                                //Check to see if there are more pages.  If so, then we will make another REST call using the next paging token
+                                //from above
                                 moreResults = TypeConvert.ToBoolean(xDoc.SelectSingleNode("root/moreResult").InnerText);
 
                                 //Get list of fields from Pivotal
@@ -1467,22 +1482,37 @@ namespace MKTO.Server.ServiceTask
                                                 curRecord[curData.fieldMapping["primaryAttributeValue"]] = primaryAttributeValue;
                                             }
 
-                                            //Save changes to Pivotal
+                                            // Save changes to Pivotal
+                                            // We want to save the record as a transaction, which is why instead of simply calling this.defaultDataAccess.SaveDataRow
+                                            // we call SaveRecordInPivotal via ExecuteServerTask, even though this method is part of this class.
+                                            // By doing it this way, we can save this record as a transaction
+                                            // and not get the warning message in the Event Viewer saying this operation should be performed within a transaction
 
-                                            DataRow drSavedDataRow = null;
                                             try
                                             {
-                                                drSavedDataRow = this.DefaultDataAccess.SaveDataRow(curRecord);
+                                                strRecordId = (string)this.SystemServer.ExecuteServerTask("MKTO.Server.ServiceTask.Integration", "SaveRecordInPivotal", new Type[] { typeof(DataRow) }, new object[] { curRecord }, true);
                                             }
                                             catch (Exception exc)
                                             {
-                                                ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
-                                                    "Marketo_Integration_Detail", integrationDetailId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, exc.Message);
-
+                                                ApplicationLog.WriteToLog(curData.configurationId, "Error occurred while attempting to save Pivotal record", System.Diagnostics.EventLogEntryType.Error,
+                                                    curData.pivObject, strRecordId, "MKTO.Server.ServiceTask.Integration", Method, exc.Message);
                                             }
+
+                                            //try
+                                            //{
+                                            //    drSavedDataRow = this.DefaultDataAccess.SaveDataRow(curRecord);
+                                            //}
+                                            //catch (Exception exc)
+                                            //{
+                                            //    ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
+                                            //        "Marketo_Integration_Detail", integrationDetailId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, exc.Message);
+
+                                            //}
+
                                             try
                                             {
-                                                curData.pivRecordId = Id.Create(drSavedDataRow[curData.pivObject + "_Id"]);
+                                                //curData.pivRecordId = Id.Create(drSavedDataRow[curData.pivObject + "_Id"]);
+                                                curData.pivRecordId = Id.Create(strRecordId);
                                             }
                                             catch (Exception e)
                                             { }
@@ -1519,77 +1549,82 @@ namespace MKTO.Server.ServiceTask
                                             }
                                             proceedToNextRecord = true;
                                         }
-                                        else
-                                        {
-                                            //Check to see if new record was added to Marketo
-                                            xmlFields = xmlRecord.SelectNodes("attributes/item");
+                                        //else
+                                        //{
+                                        //    ApplicationLog.WriteToLog(curData.configurationId, "GC Else clause reached", System.Diagnostics.EventLogEntryType.Information,
+                                        //        "Marketo_Integration_Detail", integrationDetailId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, null);
 
-                                            //Cycle through fields in XML
-                                            foreach (XmlNode xmlFieldInfo in xmlFields)
-                                            {
-                                                //Check to see if it is a new record
-                                                if (xmlFieldInfo["name"].InnerText == "Source Type" && xmlFieldInfo["value"].InnerText == "New person")
-                                                {
-                                                    //Retrieve Lead record
-                                                    //mktoURL = curData.mktoRestURL + "/v1/lead/" + marketoId + ".json?access_token="
-                                                    //    + curData.mktoOAuthToken;
-                                                    mktoURL = curData.mktoRestURL + "/v1/lead/" + marketoId + ".json";
+                                        //    //Check to see if new record was added to Marketo
+                                        //    xmlFields = xmlRecord.SelectNodes("attributes/item");
 
-                                                    XmlDocument xDoc2 = utility.CallMarketoRestAPI(mktoURL, String.Empty, String.Empty, String.Empty);
+                                        //    //Cycle through fields in XML
+                                        //    foreach (XmlNode xmlFieldInfo in xmlFields)
+                                        //    {
+                                        //        //Check to see if it is a new record
+                                        //        if (xmlFieldInfo["name"].InnerText == "Source Type" && xmlFieldInfo["value"].InnerText == "New person")
+                                        //        {
+                                        //            //Retrieve Lead record
+                                        //            //mktoURL = curData.mktoRestURL + "/v1/lead/" + marketoId + ".json?access_token="
+                                        //            //    + curData.mktoOAuthToken;
+                                        //            mktoURL = curData.mktoRestURL + "/v1/lead/" + marketoId + ".json";
 
-                                                    //Create new Lead in Pivotal
-                                                    DataRow curRecord = this.DefaultDataAccess.GetNewDataRow(curData.pivObject, pivFields);
+                                        //            XmlDocument xDoc2 = utility.CallMarketoRestAPI(mktoURL, String.Empty, String.Empty, String.Empty);
 
-                                                    //Get list of updated fields from Marketo
-                                                    XmlNode xmlNewFields = xDoc2.SelectSingleNode("root/result/item");
+                                        //            //Create new Lead in Pivotal
+                                        //            DataRow curRecord = this.DefaultDataAccess.GetNewDataRow(curData.pivObject, pivFields);
 
-                                                    //Cycle through fields in mapping
-                                                    foreach (KeyValuePair<string, string> kvp in curData.fieldMapping)
-                                                    {
-                                                        //If column exists in mapping, update value
-                                                        if (xmlNewFields[kvp.Key].InnerText != "")
-                                                        {
-                                                            if (curRecord.Table.Columns.Contains(kvp.Value))
-                                                            {
-                                                                System.Type fldType = curRecord.Table.Columns[kvp.Value].DataType;
-                                                                if (fldType.Name == "DateTime")
-                                                                {
-                                                                    curRecord[kvp.Value] = TypeConvert.ToDateTime(xmlNewFields[kvp.Key].InnerText);
-                                                                }
-                                                                else if (fldType.Name == "Int32" || fldType.Name == "Int64")
-                                                                {
-                                                                    curRecord[kvp.Value] = xmlNewFields[kvp.Key].InnerText;
-                                                                }
-                                                                else if (fldType.Name == "Double")
-                                                                {
-                                                                    curRecord[kvp.Value] = TypeConvert.ToDouble(xmlNewFields[kvp.Key].InnerText);
-                                                                }
-                                                                else if (fldType.Name == "Boolean")
-                                                                {
-                                                                    curRecord[kvp.Value] = TypeConvert.ToBoolean(xmlNewFields[kvp.Key].InnerText);
-                                                                }
-                                                                else
-                                                                {
-                                                                    curRecord[kvp.Value] = xmlNewFields[kvp.Key].InnerText;
-                                                                }
-                                                            }
-                                                        }
-                                                    }
+                                        //            //Get list of updated fields from Marketo
+                                        //            XmlNode xmlNewFields = xDoc2.SelectSingleNode("root/result/item");
 
-                                                    try
-                                                    {
-                                                        //Save changes to Pivotal
-                                                        this.DefaultDataAccess.SaveDataRow(curRecord);
-                                                    }
-                                                    catch (Exception exc)
-                                                    {
-                                                        ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
-                                                            "Marketo_Integration_Detail", integrationDetailId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, exc.Message);
+                                        //            //Cycle through fields in mapping
+                                        //            foreach (KeyValuePair<string, string> kvp in curData.fieldMapping)
+                                        //            {
+                                        //                //If column exists in mapping, update value
+                                        //                if (xmlNewFields[kvp.Key].InnerText != "")
+                                        //                {
+                                        //                    if (curRecord.Table.Columns.Contains(kvp.Value))
+                                        //                    {
+                                        //                        System.Type fldType = curRecord.Table.Columns[kvp.Value].DataType;
+                                        //                        if (fldType.Name == "DateTime")
+                                        //                        {
+                                        //                            curRecord[kvp.Value] = TypeConvert.ToDateTime(xmlNewFields[kvp.Key].InnerText);
+                                        //                        }
+                                        //                        else if (fldType.Name == "Int32" || fldType.Name == "Int64")
+                                        //                        {
+                                        //                            curRecord[kvp.Value] = xmlNewFields[kvp.Key].InnerText;
+                                        //                        }
+                                        //                        else if (fldType.Name == "Double")
+                                        //                        {
+                                        //                            curRecord[kvp.Value] = TypeConvert.ToDouble(xmlNewFields[kvp.Key].InnerText);
+                                        //                        }
+                                        //                        else if (fldType.Name == "Boolean")
+                                        //                        {
+                                        //                            curRecord[kvp.Value] = TypeConvert.ToBoolean(xmlNewFields[kvp.Key].InnerText);
+                                        //                        }
+                                        //                        else
+                                        //                        {
+                                        //                            curRecord[kvp.Value] = xmlNewFields[kvp.Key].InnerText;
+                                        //                        }
+                                        //                    }
+                                        //                }
+                                        //            }
 
-                                                    }
-                                                }
-                                            }
-                                        }
+                                        //            try
+                                        //            {
+                                        //                //Save changes to Pivotal
+                                        //                //this.DefaultDataAccess.SaveDataRow(curRecord);
+
+                                        //                this.SystemServer.ExecuteServerTask("MKTO.Server.ServiceTask.Integration", "SaveRecordInPivotal", new Type[] { typeof(DataRow) }, new object[] { curRecord }, true);
+                                        //            }
+                                        //            catch (Exception exc)
+                                        //            {
+                                        //                ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
+                                        //                    "Marketo_Integration_Detail", integrationDetailId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, exc.Message);
+
+                                        //            }
+                                        //        }
+                                        //    }
+                                        //}
                                     }
                                 }
                             }
@@ -1605,6 +1640,12 @@ namespace MKTO.Server.ServiceTask
                                     {
                                         error606 = true;
                                     }
+                                    
+                                    if (xmlError["code"].InnerText == "602")
+                                    {
+                                        error602 = true;
+                                    }
+
 
                                     errorList += xmlError["code"].InnerText + ", " + xmlError["message"].InnerText + " ";
                                 }
@@ -1612,8 +1653,8 @@ namespace MKTO.Server.ServiceTask
                                 ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
                                     "Marketo_Integration_Detail", integrationDetailId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, errorList);
 
-                                // If we encounter a 606 error, simply wait 3 seconds and attempt to reprocess again
-                                if (error606)
+                                // If we encounter either a 606 or 602 error, simply wait 3 seconds and attempt to reprocess again
+                                if (error606 || error602)
                                 {
                                     System.Threading.Thread.Sleep(3000);
                                     if (curData.isMarketoActivity || curData.marketoActivityId != null)
@@ -1666,6 +1707,13 @@ namespace MKTO.Server.ServiceTask
             }
         }
 
+        /// <summary>
+        ///     Return a list of newly created leads.  To see which leads are newly created,
+        ///     we query Narketo for activity type 12, which is New Lead
+        /// </summary>
+        /// <paramref name="integrationDetailId">Marketo_Detail_Integration_Id</paramref>
+        /// <history>
+        /// </history>
         private List<string> NewlyCreatedLeads(Id integrationDetailId)
         {
             string Method = "NewlyCreatedLeads";
@@ -1701,7 +1749,11 @@ namespace MKTO.Server.ServiceTask
                         ApplicationLog.WriteToLog(curData.configurationId, "Updating Pivotal records updated after:" + sinceDateTime, System.Diagnostics.EventLogEntryType.Information,
                             "Marketo_Integration_Detail", integrationDetailId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, "");
 
-                    do
+                    // Keep looping as long as there are results to process from the JSON call to Marketo
+                    // Each call to Marketo retrieves up to 300 results at a time
+                    // If the JSON message returns a node named moreResult, that means we need to continue
+                    // calling Marketo to get the next set of results
+                    do // while (moreResults)
                     {
                         string mktoURL = "";
                         string mktoParams = "";
@@ -1782,6 +1834,8 @@ namespace MKTO.Server.ServiceTask
                 return leadLists;
             }
         }
+
+
         /// <summary>
         ///     This method is used to update the Pivotal records from Marketo for newly created records
         ///     
@@ -1852,6 +1906,7 @@ namespace MKTO.Server.ServiceTask
                     {
                         string mktoURL = "";
                         string mktoParams = "";
+                        string strRecordId = "";
 
                         //mktoURL = curData.mktoRestURL + "/v1/leads.json?access_token=" + curData.mktoOAuthToken
                         //    + "&filterType=id"
@@ -1890,6 +1945,7 @@ namespace MKTO.Server.ServiceTask
 
                             XmlNodeList nodeList = xDoc.GetElementsByTagName("success");
                             bool error606 = false;
+                            bool error602 = false;
 
                             if (TypeConvert.ToBoolean(nodeList.Item(0).InnerText) == true)
                             {
@@ -2004,8 +2060,24 @@ namespace MKTO.Server.ServiceTask
                                                 curRecord[curData.fieldMapping["id"]] = marketoLeadId;
                                             }
 
-                                            //Save changes to Pivotal
-                                            this.DefaultDataAccess.SaveDataRow(curRecord);
+                                            // Save changes to Pivotal
+                                            // We want to save the record as a transaction, which is why instead of simply calling this.defaultDataAccess.SaveDataRow
+                                            // we call SaveRecordInPivotal via ExecuteServerTask, even though this method is part of this class.
+                                            // By doing it this way, we can save this record as a transaction
+                                            // and not get the warning message in the Event Viewer saying this operation should be performed within a transaction
+
+                                            //this.DefaultDataAccess.SaveDataRow(curRecord);
+
+                                            try
+                                            {
+                                                this.SystemServer.ExecuteServerTask("MKTO.Server.ServiceTask.Integration", "SaveRecordInPivotal", new Type[] { typeof(DataRow) }, new object[] { curRecord }, true);
+                                            }
+                                            catch (Exception exc)
+                                            {
+                                                ApplicationLog.WriteToLog(curData.configurationId, "Error occurred while attempting to save Pivotal record", System.Diagnostics.EventLogEntryType.Error,
+                                                    curData.pivObject, curData.pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, exc.Message);
+                                            }
+
                                             if (LoggingLevel >= 1)
                                             {
                                                 if (curData.pivRecordId != null)
@@ -2021,68 +2093,73 @@ namespace MKTO.Server.ServiceTask
                                             }
 
                                         }
-                                        else
-                                        {
-                                            //Check to see if new record was added to Marketo
-                                            xmlFields = xmlRecord.SelectNodes("attributes/item");
+                                        //else
+                                        //{
+                                        //    ApplicationLog.WriteToLog(curData.configurationId, "GC Else clause reached", System.Diagnostics.EventLogEntryType.Information,
+                                        //        "Marketo_Integration_Detail", integrationDetailId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, null);
 
-                                            //Cycle through fields in XML
-                                            foreach (XmlNode xmlFieldInfo in xmlFields)
-                                            {
-                                                //Check to see if it is a new record
-                                                if (xmlFieldInfo["name"].InnerText == "Source Type" && xmlFieldInfo["value"].InnerText == "New person")
-                                                {
-                                                    //Retrieve Lead record
-                                                    //mktoURL = curData.mktoRestURL + "/v1/lead/" + marketoId + ".json?access_token="
-                                                    //    + curData.mktoOAuthToken;
-                                                    mktoURL = curData.mktoRestURL + "/v1/lead/" + marketoId + ".json";
 
-                                                    XmlDocument xDoc2 = utility.CallMarketoRestAPI(mktoURL, String.Empty, String.Empty, String.Empty);
+                                        //    //Check to see if new record was added to Marketo
+                                        //    xmlFields = xmlRecord.SelectNodes("attributes/item");
 
-                                                    //Create new Lead in Pivotal
-                                                    DataRow curRecord = this.DefaultDataAccess.GetNewDataRow(curData.pivObject, pivFields);
+                                        //    //Cycle through fields in XML
+                                        //    foreach (XmlNode xmlFieldInfo in xmlFields)
+                                        //    {
+                                        //        //Check to see if it is a new record
+                                        //        if (xmlFieldInfo["name"].InnerText == "Source Type" && xmlFieldInfo["value"].InnerText == "New person")
+                                        //        {
+                                        //            //Retrieve Lead record
+                                        //            //mktoURL = curData.mktoRestURL + "/v1/lead/" + marketoId + ".json?access_token="
+                                        //            //    + curData.mktoOAuthToken;
+                                        //            mktoURL = curData.mktoRestURL + "/v1/lead/" + marketoId + ".json";
 
-                                                    //Get list of updated fields from Marketo
-                                                    XmlNode xmlNewFields = xDoc2.SelectSingleNode("root/result/item");
+                                        //            XmlDocument xDoc2 = utility.CallMarketoRestAPI(mktoURL, String.Empty, String.Empty, String.Empty);
 
-                                                    //Cycle through fields in mapping
-                                                    foreach (KeyValuePair<string, string> kvp in curData.fieldMapping)
-                                                    {
-                                                        //If column exists in mapping, update value
-                                                        if (xmlNewFields[kvp.Key].InnerText != "")
-                                                        {
-                                                            if (curRecord.Table.Columns.Contains(kvp.Value))
-                                                            {
-                                                                System.Type fldType = curRecord.Table.Columns[kvp.Value].DataType;
-                                                                if (fldType.Name == "DateTime")
-                                                                {
-                                                                    curRecord[kvp.Value] = TypeConvert.ToDateTime(xmlNewFields[kvp.Key].InnerText);
-                                                                }
-                                                                else if (fldType.Name == "Int32" || fldType.Name == "Int64")
-                                                                {
-                                                                    curRecord[kvp.Value] = xmlNewFields[kvp.Key].InnerText;
-                                                                }
-                                                                else if (fldType.Name == "Double")
-                                                                {
-                                                                    curRecord[kvp.Value] = TypeConvert.ToDouble(xmlNewFields[kvp.Key].InnerText);
-                                                                }
-                                                                else if (fldType.Name == "Boolean")
-                                                                {
-                                                                    curRecord[kvp.Value] = TypeConvert.ToBoolean(xmlNewFields[kvp.Key].InnerText);
-                                                                }
-                                                                else
-                                                                {
-                                                                    curRecord[kvp.Value] = xmlNewFields[kvp.Key].InnerText;
-                                                                }
-                                                            }
-                                                        }
-                                                    }
+                                        //            //Create new Lead in Pivotal
+                                        //            DataRow curRecord = this.DefaultDataAccess.GetNewDataRow(curData.pivObject, pivFields);
 
-                                                    //Save changes to Pivotal
-                                                    this.DefaultDataAccess.SaveDataRow(curRecord);
-                                                }
-                                            }
-                                        }
+                                        //            //Get list of updated fields from Marketo
+                                        //            XmlNode xmlNewFields = xDoc2.SelectSingleNode("root/result/item");
+
+                                        //            //Cycle through fields in mapping
+                                        //            foreach (KeyValuePair<string, string> kvp in curData.fieldMapping)
+                                        //            {
+                                        //                //If column exists in mapping, update value
+                                        //                if (xmlNewFields[kvp.Key].InnerText != "")
+                                        //                {
+                                        //                    if (curRecord.Table.Columns.Contains(kvp.Value))
+                                        //                    {
+                                        //                        System.Type fldType = curRecord.Table.Columns[kvp.Value].DataType;
+                                        //                        if (fldType.Name == "DateTime")
+                                        //                        {
+                                        //                            curRecord[kvp.Value] = TypeConvert.ToDateTime(xmlNewFields[kvp.Key].InnerText);
+                                        //                        }
+                                        //                        else if (fldType.Name == "Int32" || fldType.Name == "Int64")
+                                        //                        {
+                                        //                            curRecord[kvp.Value] = xmlNewFields[kvp.Key].InnerText;
+                                        //                        }
+                                        //                        else if (fldType.Name == "Double")
+                                        //                        {
+                                        //                            curRecord[kvp.Value] = TypeConvert.ToDouble(xmlNewFields[kvp.Key].InnerText);
+                                        //                        }
+                                        //                        else if (fldType.Name == "Boolean")
+                                        //                        {
+                                        //                            curRecord[kvp.Value] = TypeConvert.ToBoolean(xmlNewFields[kvp.Key].InnerText);
+                                        //                        }
+                                        //                        else
+                                        //                        {
+                                        //                            curRecord[kvp.Value] = xmlNewFields[kvp.Key].InnerText;
+                                        //                        }
+                                        //                    }
+                                        //                }
+                                        //            }
+
+                                        //            //Save changes to Pivotal
+                                        //            //this.DefaultDataAccess.SaveDataRow(curRecord);
+                                        //            this.SystemServer.ExecuteServerTask("MKTO.Server.ServiceTask.Integration", "SaveRecordInPivotal", new Type[] { typeof(DataRow) }, new object[] { curRecord }, true);
+                                        //        }
+                                        //    }
+                                        //}
                                     }
                                 }
                                 proceedToNextRecord = true;
@@ -2099,15 +2176,18 @@ namespace MKTO.Server.ServiceTask
                                     {
                                         error606 = true;
                                     }
-
+                                    if (xmlError["code"].InnerText == "602")
+                                    {
+                                        error606 = true;
+                                    }
                                     errorList += xmlError["code"].InnerText + ", " + xmlError["message"].InnerText + " ";
                                 }
                                 // Put error message into error Log
                                 ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
                                     "Marketo_Integration_Detail", integrationDetailId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, errorList);
 
-                                // If we encounter a 606 error, simply wait 3 seconds and attempt to reprocess again
-                                if (error606)
+                                // If we encounter a 606 or 602 error, simply wait 3 seconds and attempt to reprocess again
+                                if (error606 || error602)
                                 {
                                     System.Threading.Thread.Sleep(3000);
                                     if (curData.pivRecordId != null)
@@ -2156,6 +2236,40 @@ namespace MKTO.Server.ServiceTask
                 return false;
             }
         }
+
+        /// <summary>
+        ///     Save the datarow in Pivotal.
+        ///     This method exists to be called via this.SystemServer.ExecuteServerTask
+        ///     from UpdatePivotalRecord and UpdatePivotalRecordFromNew so that the row 
+        ///     can be saved as a separate transaction and not trigger the warning 
+        ///     message in the Event Viewer saying this operation should be performed within a transaction
+        ///     
+        ///     The record is returned as a string because Id cannot be returned when calling 
+        ///     this.SystemServer.ExecuteServerTask
+        /// </summary>
+        /// <history>
+        /// <paramref name="curRecord"/>
+        /// #Revision   Date    Author  Description
+        /// </history>
+
+        [TaskExecute]
+        public virtual string SaveRecordInPivotal(DataRow curRecord)
+        {
+            string tableName = "";
+            string strRecordId = "";
+            
+            tableName = curRecord.Table.TableName;
+            DataRow dr=this.DefaultDataAccess.SaveDataRow(curRecord);
+            try
+            {
+                strRecordId=Id.Create(curRecord[tableName + "_Id"]).ToString();
+            }
+            catch (Exception exc)
+            {
+            }
+            return strRecordId;
+        }
+
 
         /// <summary>
         ///     This method is used to update the Marketo records from Pivotal
@@ -2225,193 +2339,238 @@ namespace MKTO.Server.ServiceTask
 
                         StringBuilder jsonRecord = new StringBuilder();
                         StringBuilder jsonPrefix = new StringBuilder();
+                        int gcDebug = 0;
 
                         //Cycle through all Pivotal records
                         foreach (DataRow dr in dtPivotal.Rows)
                         {
-                            int i = 0;
-                            curData.pivRecordId = Id.Create(dr[curData.pivObject + "_Id"]);
-
-                            if (LoggingLevel >= 1)
+                            try
                             {
-                                ApplicationLog.WriteToLog(curData.configurationId, "Processing " + curData.pivObject + " records id: " + curData.pivRecordId.ToString(), 
-                                    System.Diagnostics.EventLogEntryType.Information,
-                                    curData.pivObject,curData.pivRecordId.ToString() , "MKTO.Server.ServiceTask.Integration", Method, "");
-                            }
 
-                            //Create JSON string for transfer to Marketo
-                            jsonRecord.Clear();
-                            jsonPrefix.Clear();
-                            jsonRecord.AppendLine("\"input\":[{");
-                            foreach (DataColumn col in dtPivotal.Columns)
-                            {
-                                //Ignore any fields that are not part of the mapping
-                                if (curData.fieldMapping.ContainsKey(col.ColumnName))
+                                int i = 0;
+
+                                gcDebug++;
+
+                                curData.pivRecordId = Id.Create(dr[curData.pivObject + "_Id"]);
+
+                                if (LoggingLevel >= 1)
                                 {
-                                    // If we are looking at the Unique Identifier
-                                    if (curData.fieldMapping[col.ColumnName] == curData.mktoPKFieldName)
-                                    {
-                                        jsonPrefix.AppendLine("{");
-                                        if (isCustomObject)
-                                        {
-                                            jsonPrefix.AppendLine("\"dedupeBy\":\"dedupeFields\",");
-                                        }
-                                        else
-                                        {
-                                            if (dr[col.ColumnName] != DBNull.Value)
-                                            {
-                                                jsonPrefix.AppendLine("\"lookupField\":\"id\",");
-                                                if (i > 0)
-                                                    jsonRecord.Append(",");
-                                                jsonRecord.AppendLine("\"" + curData.fieldMapping[col.ColumnName] + "\":\"" + dr[col.ColumnName] + "\"");
-                                                i++;
+                                    ApplicationLog.WriteToLog(curData.configurationId, "Processing " + curData.pivObject + " records id: " + curData.pivRecordId.ToString(),
+                                        System.Diagnostics.EventLogEntryType.Information,
+                                        curData.pivObject, curData.pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, "");
+                                }
 
-                                            }
-                                        }
-                                        curData.mktoRecordId = TypeConvert.ToString(dr[col.ColumnName]);
-                                    }
-                                    else
+                                //Create JSON string for transfer to Marketo
+                                jsonRecord.Clear();
+                                jsonPrefix.Clear();
+                                jsonRecord.AppendLine("\"input\":[{");
+                                foreach (DataColumn col in dtPivotal.Columns)
+                                {
+                                    //Ignore any fields that are not part of the mapping
+                                    if (curData.fieldMapping.ContainsKey(col.ColumnName))
                                     {
-                                        if (i > 0)
-                                            jsonRecord.Append(",");
-                                        System.Type fldType = col.DataType;
-                                        if (fldType.Name == "DateTime" && TypeConvert.ToString(dr[col.ColumnName]) !="")
-                                            //Format date field so Marketo will accept it
-                                            jsonRecord.AppendLine("\"" + curData.fieldMapping[col.ColumnName] + "\":\"" +
-                                                DateTime.Parse(TypeConvert.ToString(dr[col.ColumnName])).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ") + "\"");
+                                        // If we are looking at the Unique Identifier
+                                        if (curData.fieldMapping[col.ColumnName] == curData.mktoPKFieldName)
+                                        {
+                                            jsonPrefix.AppendLine("{");
+                                            if (isCustomObject)
+                                            {
+                                                jsonPrefix.AppendLine("\"dedupeBy\":\"dedupeFields\",");
+                                            }
+                                            else
+                                            {
+                                                if (dr[col.ColumnName] != DBNull.Value)
+                                                {
+                                                    jsonPrefix.AppendLine("\"lookupField\":\"id\",");
+                                                    if (i > 0)
+                                                        jsonRecord.Append(",");
+                                                    jsonRecord.AppendLine("\"" + curData.fieldMapping[col.ColumnName] + "\":\"" + dr[col.ColumnName] + "\"");
+                                                    i++;
+
+                                                }
+                                            }
+                                            curData.mktoRecordId = TypeConvert.ToString(dr[col.ColumnName]);
+                                        }
                                         else
-                                            jsonRecord.AppendLine("\"" + curData.fieldMapping[col.ColumnName] + "\":\"" + dr[col.ColumnName] + "\"");
-                                        i++;
+                                        {
+                                            if (i > 0)
+                                                jsonRecord.Append(",");
+                                            System.Type fldType = col.DataType;
+                                            if (fldType.Name == "DateTime" && TypeConvert.ToString(dr[col.ColumnName]) != "")
+                                                //Format date field so Marketo will accept it
+                                                jsonRecord.AppendLine("\"" + curData.fieldMapping[col.ColumnName] + "\":\"" +
+                                                    DateTime.Parse(TypeConvert.ToString(dr[col.ColumnName])).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ") + "\"");
+                                            else
+                                                jsonRecord.AppendLine("\"" + curData.fieldMapping[col.ColumnName] + "\":\"" + dr[col.ColumnName] + "\"");
+                                            i++;
+                                        }
                                     }
                                 }
-                            }
 
-                            if(jsonPrefix.ToString() == "")
-                                jsonPrefix.AppendLine("{");
+                                if (jsonPrefix.ToString() == "")
+                                    jsonPrefix.AppendLine("{");
 
-                            jsonRecord.AppendLine("}] }");
+                                jsonRecord.AppendLine("}] }");
 
-                            //Setup URL for record update
-                            string mktoURL = "";
+                                //Setup URL for record update
+                                string mktoURL = "";
 
-                            if (isCustomObject)
-                            {
-                                //mktoURL = curData.mktoRestURL + "/v1/customobjects/" + curData.mktoObject.ToLower() + ".json?access_token="
-                                //        + curData.mktoOAuthToken;
-                                mktoURL = curData.mktoRestURL + "/v1/customobjects/" + curData.mktoObject.ToLower() + ".json";
-                            }
-                            else
-                            {
-                                //mktoURL = curData.mktoRestURL + "/v1/" + curData.mktoObject.ToLower() + ".json?access_token="
-                                //        + curData.mktoOAuthToken;
-                                mktoURL = curData.mktoRestURL + "/v1/" + curData.mktoObject.ToLower() + ".json";
-                            }
-
-                            if (LoggingLevel >= 2)
-                            {
-                                ApplicationLog.WriteToLog(curData.configurationId, "POST URL: " +mktoURL, System.Diagnostics.EventLogEntryType.Information,
-                                    curData.pivObject, curData.pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, "");
-                                ApplicationLog.WriteToLog(curData.configurationId, "JSON Message: " + jsonPrefix.ToString()+ jsonRecord.ToString(), System.Diagnostics.EventLogEntryType.Information,
-                                    curData.pivObject, curData.pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, "");
-                            }
-
-                            bool proceedToNextRecord = false;
-
-
-                            // Marketo has a limit where you can only make 100 API calls within 20 seconds.
-                            // If you exceed that, you will get a 606 error.
-                            // This while loop allows us to reprocess the record if we encounter a 606 error.  
-                            // We pause for 3 seconds and then attempt to reprocess the record
-                            while (!proceedToNextRecord)
-                            {
-
-                                XmlDocument xDoc = utility.CallMarketoRestAPI(mktoURL, String.Empty, "POST",
-                                    jsonPrefix.ToString() + jsonRecord.ToString());
-
-                                XmlNodeList nodeList = xDoc.GetElementsByTagName("success");
-                                bool error606 = false;
-                                if (TypeConvert.ToBoolean(nodeList.Item(0).InnerText) == true)
+                                if (isCustomObject)
                                 {
-                                    //Get details of result
-                                    nodeList = xDoc.GetElementsByTagName("item");
-
-                                    //Check to see if updated or created
-                                    XmlNode intResult = nodeList.Item(0);
-
-                                    if (intResult["status"].InnerText == "created")
-                                    {
-                                        string mktoRecordId = "";
-                                        if (isCustomObject)
-                                        {
-                                            mktoRecordId = intResult["marketoGUID"].InnerText;
-                                        }
-                                        else
-                                        {
-                                            mktoRecordId = intResult["id"].InnerText;
-                                        }
-
-                                        //Update Pivotal record with Marketo Id
-                                        SetPivotalExternalSourceId(curData.pivObject, curData.pivRecordId, mktoRecordId);
-
-                                        if (LoggingLevel >= 1)
-                                        {
-                                            ApplicationLog.WriteToLog(curData.configurationId, "Created Marketo Record: " + mktoRecordId + " from Pivotal " + curData.pivObject + " record id: " + curData.pivRecordId.ToString(), System.Diagnostics.EventLogEntryType.Information,
-                                                curData.mktoObject, mktoRecordId, "MKTO.Server.ServiceTask.Integration", Method, "");
-                                        }
-                                    }
-                                    else if (intResult["status"].InnerText == "skipped")
-                                    {
-                                        ApplicationLog.WriteToLog(curData.configurationId, "Skipped processing Pivotal " + curData.pivObject + " record id: " + curData.pivRecordId.ToString(), System.Diagnostics.EventLogEntryType.Error,
-                                            curData.pivObject, curData.pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, "");
-                                        XmlNodeList xmlReason = intResult.SelectNodes("reasons");
-                                        string errorList = "Marketo Error: ";
-                                        foreach (XmlNode xmlReasonItem in xmlReason)
-                                        {
-                                            if (xmlReasonItem.SelectSingleNode("item/code") != null)
-                                                errorList += xmlReasonItem.SelectSingleNode("item/code").InnerText + ", "
-                                                    + xmlReasonItem.SelectSingleNode("item/message").InnerText;
-                                        }
-
-                                        // Report reason for skipping record
-                                        ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
-                                        curData.pivObject, curData.pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, errorList);
-                                    }
-                                    proceedToNextRecord= true;
+                                    //mktoURL = curData.mktoRestURL + "/v1/customobjects/" + curData.mktoObject.ToLower() + ".json?access_token="
+                                    //        + curData.mktoOAuthToken;
+                                    mktoURL = curData.mktoRestURL + "/v1/customobjects/" + curData.mktoObject.ToLower() + ".json";
                                 }
                                 else
                                 {
-                                    XmlNode xmlErrors = xDoc.SelectSingleNode("root/errors");
-                                    XmlNodeList xmlErrorList = xmlErrors.SelectNodes("item");
-                                    string errorList = "Marketo Error: ";
+                                    //mktoURL = curData.mktoRestURL + "/v1/" + curData.mktoObject.ToLower() + ".json?access_token="
+                                    //        + curData.mktoOAuthToken;
+                                    mktoURL = curData.mktoRestURL + "/v1/" + curData.mktoObject.ToLower() + ".json";
+                                }
 
-                                    foreach (XmlNode xmlError in xmlErrorList)
+                                if (LoggingLevel >= 2)
+                                {
+                                    ApplicationLog.WriteToLog(curData.configurationId, "POST URL: " + mktoURL, System.Diagnostics.EventLogEntryType.Information,
+                                        curData.pivObject, curData.pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, "");
+                                    ApplicationLog.WriteToLog(curData.configurationId, "JSON Message: " + jsonPrefix.ToString() + jsonRecord.ToString(), System.Diagnostics.EventLogEntryType.Information,
+                                        curData.pivObject, curData.pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, "");
+                                }
+
+                                bool proceedToNextRecord = false;
+
+
+                                // Marketo has a limit where you can only make 100 API calls within 20 seconds.
+                                // If you exceed that, you will get a 606 error.
+                                // This while loop allows us to reprocess the record if we encounter a 606 error.  
+                                // We pause for 3 seconds and then attempt to reprocess the record
+                                //
+                                // There is also a rare instance where the token expires just before we make a REST
+                                // call but after we had done a check to see if the token had actually expired.  This 
+                                // results in a 602 error
+                                // So if we do encounter a 602 error, we will also just wait 3 seconds before attempting to reprocess
+                                while (!proceedToNextRecord)
+                                {
+                                    XmlDocument xDoc = utility.CallMarketoRestAPI(mktoURL, String.Empty, "POST",
+                                        jsonPrefix.ToString() + jsonRecord.ToString());
+
+                                    XmlNodeList nodeList = xDoc.GetElementsByTagName("success");
+                                    bool error606 = false;
+                                    bool error602 = false;
+                                    if (TypeConvert.ToBoolean(nodeList.Item(0).InnerText) == true)
                                     {
-                                        if (xmlError["code"].InnerText == "606")
+                                        //Get details of result
+                                        nodeList = xDoc.GetElementsByTagName("item");
+
+                                        //Check to see if updated or created
+                                        XmlNode intResult = nodeList.Item(0);
+
+                                        if (intResult["status"].InnerText == "created")
                                         {
-                                            error606 = true;
+                                            string mktoRecordId = "";
+                                            if (isCustomObject)
+                                            {
+                                                mktoRecordId = intResult["marketoGUID"].InnerText;
+                                            }
+                                            else
+                                            {
+                                                mktoRecordId = intResult["id"].InnerText;
+                                            }
+
+                                            try
+                                            {
+                                                //Update Pivotal record with Marketo Id
+                                                this.SystemServer.ExecuteServerTask("MKTO.Server.ServiceTask.Integration", "SetPivotalExternalSourceId",
+                                                    new Type[] { typeof(string), typeof(Id), typeof(string), typeof(string), typeof(Id) },
+                                                    new object[] { curData.pivObject, curData.pivRecordId, mktoRecordId, curData.pivPKFieldName, curData.configurationId }, true);
+
+                                                if (LoggingLevel >= 2)
+                                                {
+                                                    ApplicationLog.WriteToLog(curData.configurationId, "Updated field " + curData.pivPKFieldName + " with value " + mktoRecordId,
+                                                        System.Diagnostics.EventLogEntryType.Information,
+                                                        curData.pivObject, curData.pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, null);
+                                                }
+
+                                                if (LoggingLevel >= 1)
+                                                {
+                                                    ApplicationLog.WriteToLog(curData.configurationId, "Created Marketo Record: " + mktoRecordId + " from Pivotal " + curData.pivObject + " record id: " + curData.pivRecordId.ToString(), System.Diagnostics.EventLogEntryType.Information,
+                                                        curData.mktoObject, mktoRecordId, "MKTO.Server.ServiceTask.Integration", Method, "");
+                                                }
+                                            }
+                                            catch (Exception exc)
+                                            {
+                                                ApplicationLog.WriteToLog(ConfigurationId, "Error occurred attenmpting to Update field " + curData.pivPKFieldName + " with value " + mktoRecordId,
+                                                    System.Diagnostics.EventLogEntryType.Information,
+                                                    curData.pivObject, curData.pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, exc.Message);
+                                            }
+
+                                            //SetPivotalExternalSourceId(curData.pivObject, curData.pivRecordId, mktoRecordId);
+
                                         }
+                                        else if (intResult["status"].InnerText == "skipped")
+                                        {
+                                            ApplicationLog.WriteToLog(curData.configurationId, "Skipped processing Pivotal " + curData.pivObject + " record id: " + curData.pivRecordId.ToString(), System.Diagnostics.EventLogEntryType.Error,
+                                                curData.pivObject, curData.pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, "");
+                                            XmlNodeList xmlReason = intResult.SelectNodes("reasons");
+                                            string errorList = "Marketo Error: ";
+                                            foreach (XmlNode xmlReasonItem in xmlReason)
+                                            {
+                                                if (xmlReasonItem.SelectSingleNode("item/code") != null)
+                                                    errorList += xmlReasonItem.SelectSingleNode("item/code").InnerText + ", "
+                                                        + xmlReasonItem.SelectSingleNode("item/message").InnerText;
+                                            }
 
-                                        errorList += xmlError["code"].InnerText + ", " + xmlError["message"].InnerText + " ";
-                                    }
-                                    // Put error message into error Log
-                                    ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
-                                        "Marketo_Integration_Detail", integrationDetailId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, errorList);
-
-                                    // If we encounter a 606 error, simply wait 3 seconds and attempt to reprocess again
-                                    if (error606)
-                                    {
-                                        System.Threading.Thread.Sleep(3000);
-                                        ApplicationLog.WriteToLog(curData.configurationId, "Attempting to reprocess: record id: " + curData.pivRecordId.ToString(), 
-                                            System.Diagnostics.EventLogEntryType.Information,
-                                            curData.mktoObject, curData.pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, "");
-                                        proceedToNextRecord = false;
-                                    }
-                                    else
-                                    // Otherwise skip to the next record.
-                                    {
+                                            // Report reason for skipping record
+                                            ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
+                                            curData.pivObject, curData.pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, errorList);
+                                        }
                                         proceedToNextRecord = true;
                                     }
+                                    else
+                                    {
+                                        XmlNode xmlErrors = xDoc.SelectSingleNode("root/errors");
+                                        XmlNodeList xmlErrorList = xmlErrors.SelectNodes("item");
+                                        string errorList = "Marketo Error: ";
+
+                                        foreach (XmlNode xmlError in xmlErrorList)
+                                        {
+                                            if (xmlError["code"].InnerText == "606")
+                                            {
+                                                error606 = true;
+                                            }
+                                            else if (xmlError["code"].InnerText == "602")
+                                            {
+                                                error602 = true;
+                                            }    
+
+                                            errorList += xmlError["code"].InnerText + ", " + xmlError["message"].InnerText + " ";
+                                        }
+                                        // Put error message into error Log
+                                        ApplicationLog.WriteToLog(curData.configurationId, "Error occurred", System.Diagnostics.EventLogEntryType.Error,
+                                            "Marketo_Integration_Detail", integrationDetailId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, errorList);
+
+                                        // If we encounter a 606 or 602 error, simply wait 3 seconds and attempt to reprocess again
+                                        if (error606 || error602 )
+                                        {
+                                            System.Threading.Thread.Sleep(3000);
+                                            ApplicationLog.WriteToLog(curData.configurationId, "Attempting to reprocess: record id: " + curData.pivRecordId.ToString(),
+                                                System.Diagnostics.EventLogEntryType.Information,
+                                                curData.mktoObject, curData.pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, "");
+                                            proceedToNextRecord = false;
+                                        }
+                                        else
+                                        // Otherwise skip to the next record.
+                                        {
+                                            proceedToNextRecord = true;
+                                        }
+                                    }
                                 }
+                            }
+                            catch (Exception exc)
+                            {
+                                ApplicationLog.WriteToLog(curData.configurationId, "Error Processing " + curData.pivObject + " records id: " + curData.pivRecordId.ToString(),
+                                    System.Diagnostics.EventLogEntryType.Error,
+                                    curData.pivObject, curData.pivRecordId.ToString(), "MKTO.Server.ServiceTask.Integration", Method, exc.Message);
+
                             }
                         }
                     }
@@ -2564,11 +2723,24 @@ namespace MKTO.Server.ServiceTask
             return mktoActivityFields.ToArray();
         }
 
+        /// <summary>
+        ///     Instantiate the ApplicationLog object if it hasn't already been instantiated
+        /// </summary>
+        /// <history>
+        /// #Revision   Date    Author  Description
+        /// </history>
         private void SetApplicationLog()
         {
             if (ApplicationLog==null) ApplicationLog = (Logging)this.SystemServer.GetMetaItem<ServerTask>("MKTO.Server.ServiceTask.Logging").CreateInstance();
         }
 
+        /// <summary>
+        ///     Parse the message returned by Marketo to return
+        ///     any errors returned by Marketo
+        /// </summary>
+        /// <history>
+        /// #Revision   Date    Author  Description
+        /// </history>
         private string parseMarketoErrors (XmlDocument doc)
         {
             const string Method = "GetMarketoObjectFields";
